@@ -71,20 +71,14 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
 
+        //Check the moves against the type of piece
         MoveCalculator calculator = switch (type) {
-//            case KING -> new KingMoveCalculator();
-//            case QUEEN -> new QueenMoveCalculator();
-//            case BISHOP -> new BishopMoveCalculator();
-//            case KNIGHT -> new KnightMoveCalculator();
-//            case ROOK -> new RookMoveCalculator();
-//            case PAWN -> new PawnMoveCalculator();
-
             case KING -> new KingMoveCalculator();
             case QUEEN -> new QueenMoveCalculator();
             case BISHOP -> new BishopMoveCalculator();
-            case KNIGHT -> new BishopMoveCalculator();
+            case KNIGHT -> new KnightMoveCalculator();
             case ROOK -> new RookMoveCalculator();
-            case PAWN -> new BishopMoveCalculator();
+            case PAWN -> new PawnMoveCalculator();
         };
         return calculator.calculateMoves(board, myPosition, piece);
     }
