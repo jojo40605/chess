@@ -38,7 +38,7 @@ public class BishopMoveCalculator implements MoveCalculator {
                     if (MoveHelperFunction.isEnemy(board, to, piece)) {
                         addBishopMove(moves, from, to);
                     }
-                    break; // bishop is blocked
+                    break;
                 }
             }
         }
