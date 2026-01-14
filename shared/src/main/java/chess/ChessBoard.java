@@ -106,8 +106,46 @@ public class ChessBoard {
 
     @Override
     public String toString() {
+        //TODO Fix this toString later so it looks like a board
         return "ChessBoard{" +
                 "squares=" + Arrays.toString(squares) +
                 '}';
     }
+
+//    public char toStringHelper(ChessPiece piece){
+//        if (piece == null) {
+//            return ' ';
+//        }
+//        char c;
+//
+//        switch(piece.getPieceType()) {
+//            case KING -> c = 'k';
+//            case QUEEN -> c = 'q';
+//            case BISHOP -> c = 'b';
+//            case KNIGHT -> c = 'n';
+//            case ROOK -> c = 'r';
+//            case PAWN -> c = 'p';
+//            default -> c = '?';
+//        }
+//
+//        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE){
+//                c = Character.toUpperCase(c);
+//        }
+//        return c;
+//
+//    }
+//
+//    @Override
+//    public String toString() {
+//        StringBuilder printedBoard = new StringBuilder();
+//        for (int i = 8; i >= 1; i--){
+//            for (int j = 1; j <= 8; j++){
+//                printedBoard.append("|");
+//                printedBoard.append(toStringHelper(squares[i - 1][j - 1]));
+//            }
+//        }
+//        return "ChessBoard{" +
+//                "squares=" + Arrays.toString(squares) +
+//                '}';
+//    }
 }

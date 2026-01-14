@@ -42,7 +42,7 @@ public class RookMoveCalculator implements MoveCalculator {
                     if (MoveHelperFunction.isEnemy(board, to, piece)) {
                         addRookMove(moves, from, to);
                     }
-                    break; // bishop is blocked
+                    break;
                 }
             }
         }
