@@ -131,7 +131,7 @@ public class ChessGame {
         return isInCheckSim(board, teamColor);
     }
 
-    //helper func for isInCheck so there's no inf loop
+    //helper func for isInCheck so there's no inf loop so that it works
     private boolean isInCheckSim(ChessBoard simBoard, TeamColor teamColor) {
         ChessPosition kingPos = findKing(simBoard, teamColor);
 
