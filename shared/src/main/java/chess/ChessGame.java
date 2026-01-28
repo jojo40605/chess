@@ -2,6 +2,7 @@ package chess;
 
 import java.util.Collection;
 import java.util.ArrayList;
+import java.util.Objects;
 
 
 /**
@@ -35,6 +36,20 @@ public class ChessGame {
      */
     public void setTeamTurn(TeamColor team) {
         this.teamTurn = team;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessGame chessGame = (ChessGame) o;
+        return Objects.equals(board, chessGame.board) && teamTurn == chessGame.teamTurn;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(board, teamTurn);
     }
 
     /**
@@ -116,6 +131,7 @@ public class ChessGame {
         return isInCheckSim(board, teamColor);
     }
 
+    //helper func for isInCheck so there's no inf loop
     private boolean isInCheckSim(ChessBoard simBoard, TeamColor teamColor) {
         ChessPosition kingPos = findKing(simBoard, teamColor);
 
