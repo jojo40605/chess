@@ -222,7 +222,7 @@ public class ChessGame {
         return board;
     }
 
-    //Helper functions
+    //Helper functions for finding the king and copying the board
 
     private ChessPosition findKing(ChessBoard b, TeamColor team) {
         for (int r = 1; r <= 8; r++) {
@@ -253,6 +253,7 @@ public class ChessGame {
         return copy;
     }
 
+    //helper function to add a piece and delete it's old position
     private void applyMove(ChessBoard b, ChessMove move) {
         ChessPiece p = b.getPiece(move.getStartPosition());
         b.addPiece(move.getEndPosition(), p);
