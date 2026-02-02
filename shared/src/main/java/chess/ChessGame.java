@@ -76,6 +76,7 @@ public class ChessGame {
         Collection<ChessMove> legalMoves = new ArrayList<>();
 
         for (ChessMove move : rawMoves) {
+            //create a new board to test the move on
             ChessBoard sim = copyBoard(board);
             applyMove(sim, move);
 
