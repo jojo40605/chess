@@ -17,10 +17,9 @@ public class ChessGame {
     private TeamColor teamTurn;
 
     public ChessGame() {
-        teamTurn = TeamColor.WHITE;
         board = new ChessBoard();
         board.resetBoard();
-
+        teamTurn = TeamColor.WHITE;
     }
 
     /**
@@ -125,7 +124,11 @@ public class ChessGame {
         }
 
         // Lastly, switch the team color
-        teamTurn = (teamTurn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE);
+        if (teamTurn == TeamColor.WHITE){
+            teamTurn = TeamColor.BLACK;
+        }else{
+            teamTurn = TeamColor.WHITE;
+        }
     }
 
     /**
@@ -193,13 +196,16 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
+        //1) Check if the king is in check
         if (isInCheck(teamColor)) return false;
 
+        //2) If not in check, get the piece and check all moves
         for (int r = 1; r <= 8; r++) {
             for (int c = 1; c <= 8; c++) {
                 ChessPosition pos = new ChessPosition(r,c);
                 ChessPiece p = board.getPiece(pos);
 
+                //3) If there are valid moves return false, else return true (it is in stalemate)
                 if (p != null && p.getTeamColor() == teamColor) {
                     Collection<ChessMove> moves = validMoves(pos);
                     if (moves != null && !moves.isEmpty()) {
@@ -229,7 +235,7 @@ public class ChessGame {
         return board;
     }
 
-    //Helper functions for finding the king and copying the board
+    //Help function that returns the king's position on anyboard
 
     private ChessPosition findKing(ChessBoard b, TeamColor team) {
         for (int r = 1; r <= 8; r++) {
@@ -246,6 +252,7 @@ public class ChessGame {
         return null;
     }
 
+    //helper function that creates an exact copy of a board
     private ChessBoard copyBoard(ChessBoard original) {
         ChessBoard copy = new ChessBoard();
         for (int r = 1; r <= 8; r++) {
