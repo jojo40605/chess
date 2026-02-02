@@ -161,24 +161,24 @@ public class ChessGame {
      * @param teamColor which team to check for checkmate
      * @return True if the specified team is in checkmate
      */
-    public boolean isInCheckmate(TeamColor teamColor) {
-        if (!isInCheck(teamColor)) return false;
-
-        for (int r = 1; r <= 8; r++) {
-            for (int c = 1; c <= 8; c++) {
-                ChessPosition pos = new ChessPosition(r,c);
-                ChessPiece p = board.getPiece(pos);
-
-                if (p != null && p.getTeamColor() == teamColor) {
-                    Collection<ChessMove> moves = validMoves(pos);
-                    if (moves != null && !moves.isEmpty()) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
-    }
+//    public boolean isInCheckmate(TeamColor teamColor) {
+//        if (!isInCheck(teamColor)) return false;
+//
+//        for (int r = 1; r <= 8; r++) {
+//            for (int c = 1; c <= 8; c++) {
+//                ChessPosition pos = new ChessPosition(r,c);
+//                ChessPiece p = board.getPiece(pos);
+//
+//                if (p != null && p.getTeamColor() == teamColor) {
+//                    Collection<ChessMove> moves = validMoves(pos);
+//                    if (moves != null && !moves.isEmpty()) {
+//                        return false;
+//                    }
+//                }
+//            }
+//        }
+//        return true;
+//    }
 
     /**
      * Determines if the given team is in stalemate, which here is defined as having
