@@ -161,24 +161,24 @@ public class ChessGame {
      * @param teamColor which team to check for checkmate
      * @return True if the specified team is in checkmate
      */
-//    public boolean isInCheckmate(TeamColor teamColor) {
-//        if (!isInCheck(teamColor)) return false;
-//
-//        for (int r = 1; r <= 8; r++) {
-//            for (int c = 1; c <= 8; c++) {
-//                ChessPosition pos = new ChessPosition(r,c);
-//                ChessPiece p = board.getPiece(pos);
-//
-//                if (p != null && p.getTeamColor() == teamColor) {
-//                    Collection<ChessMove> moves = validMoves(pos);
-//                    if (moves != null && !moves.isEmpty()) {
-//                        return false;
-//                    }
-//                }
-//            }
-//        }
-//        return true;
-//    }
+    public boolean isInCheckmate(TeamColor teamColor) {
+        if (!isInCheck(teamColor)) return false;
+
+        for (int r = 1; r <= 8; r++) {
+            for (int c = 1; c <= 8; c++) {
+                ChessPosition pos = new ChessPosition(r,c);
+                ChessPiece p = board.getPiece(pos);
+
+                if (p != null && p.getTeamColor() == teamColor) {
+                    Collection<ChessMove> moves = validMoves(pos);
+                    if (moves != null && !moves.isEmpty()) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
 
     /**
      * Determines if the given team is in stalemate, which here is defined as having
@@ -241,19 +241,19 @@ public class ChessGame {
         return null;
     }
 
-    private ChessBoard copyBoard(ChessBoard original) {
-        ChessBoard copy = new ChessBoard();
-        for (int r = 1; r <= 8; r++) {
-            for (int c = 1; c <= 8; c++) {
-                ChessPosition pos = new ChessPosition(r,c);
-                ChessPiece p = original.getPiece(pos);
-                if (p != null) {
-                    copy.addPiece(pos, new ChessPiece(p.getTeamColor(), p.getPieceType()));
-                }
-            }
-        }
-        return copy;
-    }
+//    private ChessBoard copyBoard(ChessBoard original) {
+//        ChessBoard copy = new ChessBoard();
+//        for (int r = 1; r <= 8; r++) {
+//            for (int c = 1; c <= 8; c++) {
+//                ChessPosition pos = new ChessPosition(r,c);
+//                ChessPiece p = original.getPiece(pos);
+//                if (p != null) {
+//                    copy.addPiece(pos, new ChessPiece(p.getTeamColor(), p.getPieceType()));
+//                }
+//            }
+//        }
+//        return copy;
+//    }
 
     //helper function to add a piece and delete it's old position
     private void applyMove(ChessBoard b, ChessMove move) {
