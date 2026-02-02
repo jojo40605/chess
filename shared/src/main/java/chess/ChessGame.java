@@ -95,8 +95,13 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        // Start by getting the correct piece
         ChessPiece piece = board.getPiece(move.getStartPosition());
 
+        //Ensure three things
+        //1) There is a piece
+        //2) It's the right turn
+        //3)It's a valid move
         if (piece == null) throw new InvalidMoveException("No piece");
 
         if (piece.getTeamColor() != teamTurn)
@@ -107,11 +112,11 @@ public class ChessGame {
         if (!legal.contains(move))
             throw new InvalidMoveException("Illegal move");
 
-        // execute
+        // If all of those are valid add the piece
         board.addPiece(move.getEndPosition(), piece);
         board.addPiece(move.getStartPosition(), null);
 
-        // promotion
+        // Check for a promotion
         if (move.getPromotionPiece() != null) {
             board.addPiece(
                     move.getEndPosition(),
@@ -119,7 +124,7 @@ public class ChessGame {
             );
         }
 
-        // switch turn
+        // Lastly, switch the team color
         teamTurn = (teamTurn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE);
     }
 
@@ -241,19 +246,19 @@ public class ChessGame {
         return null;
     }
 
-//    private ChessBoard copyBoard(ChessBoard original) {
-//        ChessBoard copy = new ChessBoard();
-//        for (int r = 1; r <= 8; r++) {
-//            for (int c = 1; c <= 8; c++) {
-//                ChessPosition pos = new ChessPosition(r,c);
-//                ChessPiece p = original.getPiece(pos);
-//                if (p != null) {
-//                    copy.addPiece(pos, new ChessPiece(p.getTeamColor(), p.getPieceType()));
-//                }
-//            }
-//        }
-//        return copy;
-//    }
+    private ChessBoard copyBoard(ChessBoard original) {
+        ChessBoard copy = new ChessBoard();
+        for (int r = 1; r <= 8; r++) {
+            for (int c = 1; c <= 8; c++) {
+                ChessPosition pos = new ChessPosition(r,c);
+                ChessPiece p = original.getPiece(pos);
+                if (p != null) {
+                    copy.addPiece(pos, new ChessPiece(p.getTeamColor(), p.getPieceType()));
+                }
+            }
+        }
+        return copy;
+    }
 
     //helper function to add a piece and delete it's old position
     private void applyMove(ChessBoard b, ChessMove move) {
