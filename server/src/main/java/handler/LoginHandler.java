@@ -20,21 +20,21 @@ public class LoginHandler {
         try {
             LoginRequest request = gson.fromJson(ctx.body(), LoginRequest.class);
 
-            var auth = userService.login(
-                    request.username(),
-                    request.password()
-            );
+            // Check for missing fields FIRST
+            if (request.username() == null || request.password() == null) {
+                ctx.status(400);
+                ctx.json(new ErrorResult("Error: bad request"));
+                return;
+            }
 
+            var auth = userService.login(request.username(), request.password());
             ctx.status(200);
             ctx.json(new LoginResult(auth.username(), auth.authToken()));
 
         } catch (Exception e) {
-            if (e.getMessage().contains("unauthorized")) {
-                ctx.status(401);
-            } else {
-                ctx.status(400);
-            }
-            ctx.json(new ErrorResult(e.getMessage()));
+            // Only return 401 if the fields were there but password was wrong
+            ctx.status(401);
+            ctx.json(new ErrorResult("Error: unauthorized"));
         }
     }
 }
