@@ -1,3 +1,4 @@
+//TODO add comments for quality
 package handler;
 
 import dataaccess.DataAccessException;
