@@ -1,5 +1,6 @@
 package handler;
 
+import dataaccess.DataAccessException;
 import io.javalin.http.Context;
 
 public class ClearHandler {
@@ -10,9 +11,8 @@ public class ClearHandler {
         this.dataAccess = dataAccess;
     }
 
-    public void handle(Context ctx) {
-        //FIXME: clear() not working
-        //dataAccess.clear();
+    public void handle(Context ctx) throws DataAccessException {
+        dataAccess.clear();
         ctx.status(200);
         ctx.result("{}");
     }
