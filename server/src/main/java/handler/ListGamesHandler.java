@@ -1,9 +1,7 @@
 package handler;
 
-import com.google.gson.Gson;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
-import result.ErrorResult;
 import result.ListGamesResult;
 import service.GameService;
 
