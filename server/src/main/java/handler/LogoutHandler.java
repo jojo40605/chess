@@ -32,23 +32,7 @@ public class LogoutHandler {
             ctx.result("{}");
 
         } catch (Exception e) {
-            handleError(ctx, e);
+            HandlerUtils.handleError(ctx, e);
         }
-    }
-
-    /**
-     * Determines the appropriate status code and returns an ErrorResult.
-     */
-    private void handleError(Context ctx, Exception e) {
-        String message = e.getMessage();
-
-        // 401 is standard for logout failures (e.g., invalid/already cleared token)
-        if (message != null && message.toLowerCase().contains("unauthorized")) {
-            ctx.status(HttpStatus.UNAUTHORIZED);
-        } else {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        ctx.json(new ErrorResult("Error: " + message));
     }
 }

@@ -14,7 +14,6 @@ import service.GameService;
 public class ListGamesHandler {
 
     private final GameService gameService;
-    private final Gson gson = new Gson();
 
     public ListGamesHandler(GameService gameService) {
         this.gameService = gameService;
@@ -35,23 +34,7 @@ public class ListGamesHandler {
             ctx.json(new ListGamesResult(games));
 
         } catch (Exception e) {
-            handleError(ctx, e);
+            HandlerUtils.handleError(ctx, e);
         }
-    }
-
-    /**
-     * Maps errors to the appropriate HTTP status.
-     * Specifically looks for unauthorized access attempts.
-     */
-    private void handleError(Context ctx, Exception e) {
-        String message = e.getMessage();
-
-        if (message != null && message.toLowerCase().contains("unauthorized")) {
-            ctx.status(HttpStatus.UNAUTHORIZED);
-        } else {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        ctx.json(new ErrorResult("Error: " + message));
     }
 }

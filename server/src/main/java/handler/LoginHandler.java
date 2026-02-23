@@ -41,7 +41,7 @@ public class LoginHandler {
             ctx.json(new ErrorResult("Error: " + e.getMessage()));
         } catch (Exception e) {
             // Handles authentication failures or server errors
-            handleError(ctx, e);
+            HandlerUtils.handleError(ctx, e);
         }
     }
 
@@ -49,15 +49,5 @@ public class LoginHandler {
         if (request.username() == null || request.password() == null) {
             throw new IllegalArgumentException("bad request");
         }
-    }
-
-    private void handleError(Context ctx, Exception e) {
-        String message = e.getMessage();
-        if (message != null && message.toLowerCase().contains("unauthorized")) {
-            ctx.status(HttpStatus.UNAUTHORIZED);
-        } else {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        ctx.json(new ErrorResult("Error: " + message));
     }
 }
