@@ -78,11 +78,11 @@ public class ChessGame {
     }
 
     public boolean isInCheckmate(TeamColor teamColor) {
-        return isInCheck(teamColor) && !hasAnyValidMoves(teamColor);
+        return isInCheck(teamColor) && hasAnyValidMoves(teamColor);
     }
 
     public boolean isInStalemate(TeamColor teamColor) {
-        return !isInCheck(teamColor) && !hasAnyValidMoves(teamColor);
+        return !isInCheck(teamColor) && hasAnyValidMoves(teamColor);
     }
 
     /**
@@ -98,12 +98,12 @@ public class ChessGame {
                 if (p != null && p.getTeamColor() == teamColor) {
                     Collection<ChessMove> moves = validMoves(pos);
                     if (moves != null && !moves.isEmpty()) {
-                        return true;
+                        return false;
                     }
                 }
             }
         }
-        return false;
+        return true;
     }
 
     private boolean isInCheckSim(ChessBoard simBoard, TeamColor teamColor) {
