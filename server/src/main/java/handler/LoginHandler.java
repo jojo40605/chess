@@ -1,13 +1,17 @@
-//TODO add comments for quality
 package handler;
 
 import com.google.gson.Gson;
 import io.javalin.http.Context;
+import io.javalin.http.HttpStatus;
 import request.LoginRequest;
 import result.ErrorResult;
 import result.LoginResult;
 import service.UserService;
 
+/**
+ * Handles HTTP requests for user authentication (Login).
+ * Converts JSON requests into LoginRequest objects and returns LoginResult on success.
+ */
 public class LoginHandler {
 
     private final UserService userService;
@@ -17,25 +21,43 @@ public class LoginHandler {
         this.userService = userService;
     }
 
+    /**
+     * Processes the login request.
+     * * @param ctx the Javalin context for the current HTTP request
+     */
     public void handle(Context ctx) {
         try {
             LoginRequest request = gson.fromJson(ctx.body(), LoginRequest.class);
+            validateRequest(request);
 
-            // Check for missing fields FIRST
-            if (request.username() == null || request.password() == null) {
-                ctx.status(400);
-                ctx.json(new ErrorResult("Error: bad request"));
-                return;
-            }
+            var authData = userService.login(request.username(), request.password());
 
-            var auth = userService.login(request.username(), request.password());
-            ctx.status(200);
-            ctx.json(new LoginResult(auth.username(), auth.authToken()));
+            ctx.status(HttpStatus.OK);
+            ctx.json(new LoginResult(authData.username(), authData.authToken()));
 
+        } catch (IllegalArgumentException e) {
+            // Specifically handles the "bad request" (missing fields) case
+            ctx.status(HttpStatus.BAD_REQUEST);
+            ctx.json(new ErrorResult("Error: " + e.getMessage()));
         } catch (Exception e) {
-            // Only return 401 if the fields were there but password was wrong
-            ctx.status(401);
-            ctx.json(new ErrorResult("Error: unauthorized"));
+            // Handles authentication failures or server errors
+            handleError(ctx, e);
         }
+    }
+
+    private void validateRequest(LoginRequest request) {
+        if (request.username() == null || request.password() == null) {
+            throw new IllegalArgumentException("bad request");
+        }
+    }
+
+    private void handleError(Context ctx, Exception e) {
+        String message = e.getMessage();
+        if (message != null && message.toLowerCase().contains("unauthorized")) {
+            ctx.status(HttpStatus.UNAUTHORIZED);
+        } else {
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        ctx.json(new ErrorResult("Error: " + message));
     }
 }

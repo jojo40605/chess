@@ -1,4 +1,3 @@
-//TODO add comments for quality
 package handler;
 
 import com.google.gson.Gson;
@@ -7,6 +6,10 @@ import request.JoinGameRequest;
 import result.ErrorResult;
 import service.GameService;
 
+/**
+ * Handles HTTP requests to join an existing chess game.
+ * Extracts auth and request data before delegation to the service layer
+ */
 public class JoinGameHandler {
 
     private final GameService gameService;
@@ -16,6 +19,11 @@ public class JoinGameHandler {
         this.gameService = gameService;
     }
 
+    /**
+     * Processes the join game request and returns an empty JSON object on success.
+     *
+     * @param ctx the Javalin context for the current HTTP request
+     */
     public void handle(Context ctx) {
         try {
             JoinGameRequest request = parseRequest(ctx);
@@ -54,14 +62,14 @@ public class JoinGameHandler {
 
     /** Prepends "Error: " if not already present */
     private String normalizeErrorMessage(String message) {
-        if (message == null) return "Error: Unknown error";
+        if (message == null) {return "Error: Unknown error";}
         return message.toLowerCase().contains("error") ? message : "Error: " + message;
     }
 
     /** Maps error messages to HTTP status codes */
     private int determineStatusCode(String message) {
-        if (message.toLowerCase().contains("unauthorized")) return 401;
-        if (message.toLowerCase().contains("already")) return 403;
+        if (message.toLowerCase().contains("unauthorized")) {return 401;}
+        if (message.toLowerCase().contains("already")) {return 403;}
         return 400; // default for other errors
     }
 }

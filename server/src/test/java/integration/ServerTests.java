@@ -97,7 +97,7 @@ public class ServerTests {
                 .uri(URI.create(baseUrl + port + path))
                 .header("Content-Type", "application/json");
 
-        if (token != null) builder.header("Authorization", token);
+        if (token != null) {builder.header("Authorization", token);}
 
         HttpRequest.BodyPublisher bodyPublisher = (body == null)
                 ? HttpRequest.BodyPublishers.noBody()
