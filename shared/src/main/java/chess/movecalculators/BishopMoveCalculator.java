@@ -1,18 +1,13 @@
-package chess.MoveCalculators;
+package chess.movecalculators;
 
-import chess.ChessBoard;
-import chess.ChessMove;
-import chess.ChessPiece;
-import chess.ChessPosition;
-
+import chess.*;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class QueenMoveCalculator implements MoveCalculator {
+public class BishopMoveCalculator implements MoveCalculator {
 
     private static final int[][] DIRECTIONS = {
-            {1, 1}, {1, -1}, {-1, 1}, {-1, -1},
-            {1, 0}, {0, 1}, {-1, 0}, {0, -1}
+            {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
     };
 
     @Override
@@ -38,12 +33,12 @@ public class QueenMoveCalculator implements MoveCalculator {
                 ChessPosition to = new ChessPosition(row, col);
 
                 if (MoveHelperFunction.isEmpty(board, to)) {
-                    addQueenMove(moves, from, to);
+                    addBishopMove(moves, from, to);
                 } else {
                     if (MoveHelperFunction.isEnemy(board, to, piece)) {
-                        addQueenMove(moves, from, to);
+                        addBishopMove(moves, from, to);
                     }
-                    break; // queen is blocked
+                    break;
                 }
             }
         }
@@ -51,7 +46,7 @@ public class QueenMoveCalculator implements MoveCalculator {
         return moves;
     }
 
-    private void addQueenMove(
+    private void addBishopMove(
             Collection<ChessMove> moves,
             ChessPosition from,
             ChessPosition to

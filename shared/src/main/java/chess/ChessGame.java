@@ -69,7 +69,7 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece piece = board.getPiece(startPosition);
-        if (piece == null) return null;
+        if (piece == null) {return null;}
 
         Collection<ChessMove> rawMoves = piece.pieceMoves(board, startPosition);
         Collection<ChessMove> legalMoves = new ArrayList<>();
@@ -101,15 +101,15 @@ public class ChessGame {
         //1) There is a piece
         //2) It's the right turn
         //3)It's a valid move
-        if (piece == null) throw new InvalidMoveException("No piece");
+        if (piece == null) {throw new InvalidMoveException("No piece");}
 
-        if (piece.getTeamColor() != teamTurn)
-            throw new InvalidMoveException("Wrong turn");
+        if (piece.getTeamColor() != teamTurn){
+            throw new InvalidMoveException("Wrong turn");}
 
         Collection<ChessMove> legal = validMoves(move.getStartPosition());
 
-        if (!legal.contains(move))
-            throw new InvalidMoveException("Illegal move");
+        if (!legal.contains(move)){
+            throw new InvalidMoveException("Illegal move");}
 
         // If all of those are valid add the piece
         board.addPiece(move.getEndPosition(), piece);
@@ -147,17 +147,31 @@ public class ChessGame {
 
         for (int r = 1; r <= 8; r++) {
             for (int c = 1; c <= 8; c++) {
-                ChessPosition pos = new ChessPosition(r,c);
-                ChessPiece p = simBoard.getPiece(pos);
-
-                if (p != null && p.getTeamColor() != teamColor) {
-                    Collection<ChessMove> moves = p.pieceMoves(simBoard, pos);
-                    for (ChessMove m : moves) {
-                        if (m.getEndPosition().equals(kingPos)) {
-                            return true;
-                        }
-                    }
+                ChessPosition pos = new ChessPosition(r, c);
+                if (canPieceAttackPosition(simBoard, pos, kingPos, teamColor)) {
+                    return true;
                 }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Helper method to determine if an opponent piece at a specific position can attack the target.
+     * This breaks the nesting depth and improves readability.
+     */
+    private boolean canPieceAttackPosition(ChessBoard board, ChessPosition piecePos,
+                                           ChessPosition targetPos, TeamColor ourColor) {
+        ChessPiece piece = board.getPiece(piecePos);
+
+        if (piece == null || piece.getTeamColor() == ourColor) {
+            return false;
+        }
+
+        Collection<ChessMove> moves = piece.pieceMoves(board, piecePos);
+        for (ChessMove move : moves) {
+            if (move.getEndPosition().equals(targetPos)) {
+                return true;
             }
         }
         return false;
@@ -170,7 +184,7 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        if (!isInCheck(teamColor)) return false;
+        if (!isInCheck(teamColor)) {return false;}
 
         for (int r = 1; r <= 8; r++) {
             for (int c = 1; c <= 8; c++) {
@@ -197,7 +211,7 @@ public class ChessGame {
      */
     public boolean isInStalemate(TeamColor teamColor) {
         //1) Check if the king is in check
-        if (isInCheck(teamColor)) return false;
+        if (isInCheck(teamColor)) {return false;}
 
         //2) If not in check, get the piece and check all moves
         for (int r = 1; r <= 8; r++) {

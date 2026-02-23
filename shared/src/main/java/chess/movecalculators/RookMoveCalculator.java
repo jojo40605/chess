@@ -1,13 +1,17 @@
-package chess.MoveCalculators;
+package chess.movecalculators;
 
-import chess.*;
+import chess.ChessBoard;
+import chess.ChessMove;
+import chess.ChessPiece;
+import chess.ChessPosition;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class BishopMoveCalculator implements MoveCalculator {
+public class RookMoveCalculator implements MoveCalculator {
 
     private static final int[][] DIRECTIONS = {
-            {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
+            {1, 0}, {0, 1}, {-1, 0}, {0, -1}
     };
 
     @Override
@@ -33,10 +37,10 @@ public class BishopMoveCalculator implements MoveCalculator {
                 ChessPosition to = new ChessPosition(row, col);
 
                 if (MoveHelperFunction.isEmpty(board, to)) {
-                    addBishopMove(moves, from, to);
+                    addRookMove(moves, from, to);
                 } else {
                     if (MoveHelperFunction.isEnemy(board, to, piece)) {
-                        addBishopMove(moves, from, to);
+                        addRookMove(moves, from, to);
                     }
                     break;
                 }
@@ -46,7 +50,7 @@ public class BishopMoveCalculator implements MoveCalculator {
         return moves;
     }
 
-    private void addBishopMove(
+    private void addRookMove(
             Collection<ChessMove> moves,
             ChessPosition from,
             ChessPosition to

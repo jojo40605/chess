@@ -1,4 +1,4 @@
-package chess.MoveCalculators;
+package chess.movecalculators;
 
 import chess.ChessBoard;
 import chess.ChessMove;
@@ -8,9 +8,10 @@ import chess.ChessPosition;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class RookMoveCalculator implements MoveCalculator {
+public class QueenMoveCalculator implements MoveCalculator {
 
     private static final int[][] DIRECTIONS = {
+            {1, 1}, {1, -1}, {-1, 1}, {-1, -1},
             {1, 0}, {0, 1}, {-1, 0}, {0, -1}
     };
 
@@ -37,12 +38,12 @@ public class RookMoveCalculator implements MoveCalculator {
                 ChessPosition to = new ChessPosition(row, col);
 
                 if (MoveHelperFunction.isEmpty(board, to)) {
-                    addRookMove(moves, from, to);
+                    addQueenMove(moves, from, to);
                 } else {
                     if (MoveHelperFunction.isEnemy(board, to, piece)) {
-                        addRookMove(moves, from, to);
+                        addQueenMove(moves, from, to);
                     }
-                    break;
+                    break; // queen is blocked
                 }
             }
         }
@@ -50,7 +51,7 @@ public class RookMoveCalculator implements MoveCalculator {
         return moves;
     }
 
-    private void addRookMove(
+    private void addQueenMove(
             Collection<ChessMove> moves,
             ChessPosition from,
             ChessPosition to
