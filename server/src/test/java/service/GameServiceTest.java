@@ -75,4 +75,5 @@ public class GameServiceTest {
                 gameService.joinGame(validToken, id, "WHITE")
         );
     }
+
 }

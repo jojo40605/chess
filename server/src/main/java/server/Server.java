@@ -42,6 +42,7 @@ public class Server {
         DataAccess dataAccess = new MemoryDataAccess();
         UserService userService = new UserService(dataAccess);
         GameService gameService = new GameService(dataAccess);
+        var clearService = new ClearService(dataAccess);
 
         // 2. Initialize Handlers
         var registerHandler = new RegisterHandler(userService);
@@ -50,7 +51,7 @@ public class Server {
         var listGamesHandler = new ListGamesHandler(gameService);
         var createGameHandler = new CreateGameHandler(gameService);
         var joinGameHandler = new JoinGameHandler(gameService);
-        var clearHandler = new ClearHandler(dataAccess);
+        var clearHandler = new ClearHandler(clearService);
 
         // 3. Register Endpoints
         javalin.post("/user", registerHandler::handle);
