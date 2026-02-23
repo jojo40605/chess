@@ -16,46 +16,9 @@ public class QueenMoveCalculator implements MoveCalculator {
     };
 
     @Override
-    public Collection<ChessMove> calculateMoves(
-            ChessBoard board,
-            ChessPosition from,
-            ChessPiece piece
-    ) {
+    public Collection<ChessMove> calculateMoves(ChessBoard board, ChessPosition from, ChessPiece piece) {
         Collection<ChessMove> moves = new ArrayList<>();
-
-        for (int[] dir : DIRECTIONS) {
-            int row = from.getRow();
-            int col = from.getColumn();
-
-            while (true) {
-                row += dir[0];
-                col += dir[1];
-
-                if (!MoveHelperFunction.inBounds(row, col)) {
-                    break;
-                }
-
-                ChessPosition to = new ChessPosition(row, col);
-
-                if (MoveHelperFunction.isEmpty(board, to)) {
-                    addQueenMove(moves, from, to);
-                } else {
-                    if (MoveHelperFunction.isEnemy(board, to, piece)) {
-                        addQueenMove(moves, from, to);
-                    }
-                    break; // queen is blocked
-                }
-            }
-        }
-
+        MoveHelperFunction.addSlidingMoves(moves, board, from, piece, DIRECTIONS);
         return moves;
-    }
-
-    private void addQueenMove(
-            Collection<ChessMove> moves,
-            ChessPosition from,
-            ChessPosition to
-    ) {
-        moves.add(new ChessMove(from, to, null));
     }
 }
