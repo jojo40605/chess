@@ -88,8 +88,9 @@ public class ServerTests {
     private String getToken(String u, String p, String e) throws Exception {
         var body = Map.of("username", u, "password", p, "email", e);
         HttpResponse<String> res = sendRequest("/user", "POST", body, null);
-        Map<String, Object> map = gson.fromJson(res.body(), Map.class);
-        return (String) map.get("authToken");
+
+        result.RegisterResult resObj = gson.fromJson(res.body(), result.RegisterResult.class);
+        return resObj.authToken();
     }
 
     private HttpResponse<String> sendRequest(String path, String method, Object body, String token) throws Exception {
