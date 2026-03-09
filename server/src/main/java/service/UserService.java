@@ -5,6 +5,7 @@ import dataaccess.DataAccessException;
 import model.AuthData;
 import model.UserData;
 import java.util.UUID;
+import org.mindrot.jbcrypt.BCrypt;
 
 /**
  * Service class for user-related operations including registration, login, and logout.
@@ -35,7 +36,9 @@ public class UserService {
     public AuthData register(String username, String password, String email)
             throws DataAccessException {
 
-        if (username == null || password == null || email == null) {
+        if (username == null || username.isBlank() ||
+                password == null || password.isBlank() ||
+                email == null || email.isBlank()) {
             throw new DataAccessException("Error: bad request");
         }
 
@@ -43,7 +46,10 @@ public class UserService {
             throw new DataAccessException("Error: already taken");
         }
 
-        UserData user = new UserData(username, password, email);
+        // Hash the password before storing it
+        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+
+        UserData user = new UserData(username, hashedPassword, email);
         dataAccess.createUser(user);
 
         return generateAuth(username);
@@ -62,7 +68,8 @@ public class UserService {
 
         UserData user = dataAccess.getUser(username);
 
-        if (user == null || !user.password().equals(password)) {
+        // Use BCrypt to compare the stored hashed password with the plain password
+        if (user == null || !BCrypt.checkpw(password, user.password())) {
             throw new DataAccessException("Error: unauthorized");
         }
 
