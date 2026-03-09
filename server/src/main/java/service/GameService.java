@@ -35,22 +35,22 @@ public class GameService {
     public int createGame(String authToken, String gameName) throws DataAccessException {
         validateAuth(authToken);
 
-        if (gameName == null) {
+        if (gameName == null || gameName.isBlank()) {
             throw new DataAccessException("Error: bad request");
         }
 
-        // Logic relies on specific MemoryDataAccess implementation for ID generation
-        int gameID = ((dataaccess.MemoryDataAccess) dataAccess).generateGameID();
-
+        // Create a new game object; initially no players
         GameData game = new GameData(
-                gameID,
-                null,
-                null,
+                0,          // ID will be set by the database
+                null,       // white player
+                null,       // black player
                 gameName,
                 new ChessGame()
         );
 
-        dataAccess.createGame(game);
+        // Let DatabaseDataAccess return the generated ID
+        int gameID = dataAccess.createGame(game);
+
         return gameID;
     }
 

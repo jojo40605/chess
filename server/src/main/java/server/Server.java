@@ -18,11 +18,18 @@ public class Server {
     public Server() {
         Gson gson = new Gson();
 
+        // 0. Initialize Database
+        try {
+            DatabaseManager.initialize();
+            System.out.println("Database initialized successfully!");
+        } catch (DataAccessException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+
         javalin = Javalin.create(config -> {
-            // Fix 1: Properly map static files
             config.staticFiles.add("/web", Location.CLASSPATH);
 
-            // Fix 2: Tell Javalin to use GSON instead of Jackson
             config.jsonMapper(new JsonMapper() {
                 @NotNull
                 @Override
@@ -39,7 +46,7 @@ public class Server {
         });
 
         // 1. Initialize DataAccess and Services
-        DataAccess dataAccess = new MemoryDataAccess();
+        DataAccess dataAccess = new DatabaseDataAccess();
         UserService userService = new UserService(dataAccess);
         GameService gameService = new GameService(dataAccess);
         var clearService = new ClearService(dataAccess);

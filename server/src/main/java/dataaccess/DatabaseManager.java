@@ -2,76 +2,104 @@ package dataaccess;
 
 import java.sql.*;
 import java.util.Properties;
+import java.io.InputStream;
 
 public class DatabaseManager {
+
     private static String databaseName;
     private static String dbUsername;
     private static String dbPassword;
     private static String connectionUrl;
 
-    /*
-     * Load the database information for the db.properties file.
-     */
+    // ===================== STATIC BLOCK TO LOAD PROPERTIES =====================
     static {
         loadPropertiesFromResources();
     }
 
-    /**
-     * Creates the database if it does not already exist.
-     */
-    static public void createDatabase() throws DataAccessException {
-        var statement = "CREATE DATABASE IF NOT EXISTS " + databaseName;
-        try (var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
-             var preparedStatement = conn.prepareStatement(statement)) {
-            preparedStatement.executeUpdate();
-        } catch (SQLException ex) {
-            throw new DataAccessException("failed to create database", ex);
-        }
-    }
-
-    /**
-     * Create a connection to the database and sets the catalog based upon the
-     * properties specified in db.properties. Connections to the database should
-     * be short-lived, and you must close the connection when you are done with it.
-     * The easiest way to do that is with a try-with-resource block.
-     * <br/>
-     * <code>
-     * try (var conn = DatabaseManager.getConnection()) {
-     * // execute SQL statements.
-     * }
-     * </code>
-     */
-    static Connection getConnection() throws DataAccessException {
-        try {
-            //do not wrap the following line with a try-with-resources
-            var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
-            conn.setCatalog(databaseName);
-            return conn;
-        } catch (SQLException ex) {
-            throw new DataAccessException("failed to get connection", ex);
-        }
-    }
-
+    // ===================== LOAD PROPERTIES =====================
     private static void loadPropertiesFromResources() {
-        try (var propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties")) {
+        try (InputStream propStream = Thread.currentThread()
+                .getContextClassLoader().getResourceAsStream("db.properties")) {
             if (propStream == null) {
                 throw new Exception("Unable to load db.properties");
             }
+
             Properties props = new Properties();
             props.load(propStream);
-            loadProperties(props);
+
+            databaseName = props.getProperty("db.name");
+            dbUsername = props.getProperty("db.user");
+            dbPassword = props.getProperty("db.password");
+
+            String host = props.getProperty("db.host");
+            int port = Integer.parseInt(props.getProperty("db.port"));
+            connectionUrl = String.format("jdbc:mysql://%s:%d?serverTimezone=UTC", host, port);
+
         } catch (Exception ex) {
-            throw new RuntimeException("unable to process db.properties", ex);
+            throw new RuntimeException("Unable to process db.properties", ex);
         }
     }
 
-    private static void loadProperties(Properties props) {
-        databaseName = props.getProperty("db.name");
-        dbUsername = props.getProperty("db.user");
-        dbPassword = props.getProperty("db.password");
+    // ===================== CREATE DATABASE =====================
+    public static void createDatabase() throws DataAccessException {
+        String sql = "CREATE DATABASE IF NOT EXISTS " + databaseName;
+        try (Connection conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
+             Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate(sql);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to create database", ex);
+        }
+    }
 
-        var host = props.getProperty("db.host");
-        var port = Integer.parseInt(props.getProperty("db.port"));
-        connectionUrl = String.format("jdbc:mysql://%s:%d", host, port);
+    // ===================== GET CONNECTION =====================
+    public static Connection getConnection() throws DataAccessException {
+        try {
+            Connection conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
+            conn.setCatalog(databaseName);
+            return conn;
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to get connection", ex);
+        }
+    }
+
+    // ===================== INITIALIZE TABLES =====================
+    public static void initializeTables() throws DataAccessException {
+        String createUsers =
+                "CREATE TABLE IF NOT EXISTS users (" +
+                        "username VARCHAR(50) PRIMARY KEY," +
+                        "password VARCHAR(255) NOT NULL," +
+                        "email VARCHAR(255) NOT NULL" +
+                        ")";
+        String createAuth =
+                "CREATE TABLE IF NOT EXISTS auth (" +
+                        "token VARCHAR(255) PRIMARY KEY," +
+                        "username VARCHAR(50) NOT NULL," +
+                        "FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE" +
+                        ")";
+        String createGames =
+                "CREATE TABLE IF NOT EXISTS games (" +
+                        "id INT AUTO_INCREMENT PRIMARY KEY," +
+                        "whiteUsername VARCHAR(50) NOT NULL," +
+                        "blackUsername VARCHAR(50) NOT NULL," +
+                        "gameName VARCHAR(100)," +
+                        "gameState BLOB," +
+                        "FOREIGN KEY (whiteUsername) REFERENCES users(username) ON DELETE CASCADE," +
+                        "FOREIGN KEY (blackUsername) REFERENCES users(username) ON DELETE CASCADE" +
+                        ")";
+
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate(createUsers);
+            stmt.executeUpdate(createAuth);
+            stmt.executeUpdate(createGames);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to initialize tables", ex);
+        }
+    }
+
+    // ===================== HELPER TO INITIALIZE DATABASE + TABLES =====================
+    public static void initialize() throws DataAccessException {
+        createDatabase();
+        initializeTables();
     }
 }
