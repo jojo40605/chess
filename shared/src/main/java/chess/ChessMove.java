@@ -1,5 +1,6 @@
 package chess;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -8,7 +9,7 @@ import java.util.Objects;
  * Note: You can add to this class, but you may not alter
  * signature of the existing methods.
  */
-public class ChessMove {
+public class ChessMove implements Serializable {
 
     private final ChessPosition startPosition;
     private final ChessPosition endPosition;

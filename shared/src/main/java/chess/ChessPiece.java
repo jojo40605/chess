@@ -1,5 +1,6 @@
 package chess;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -11,7 +12,7 @@ import chess.movecalculators.*;
  * Note: You can add to this class, but you may not alter
  * signature of the existing methods.
  */
-public class ChessPiece {
+public class ChessPiece implements Serializable{
 
     private final ChessGame.TeamColor pieceColor;
     private final PieceType type;

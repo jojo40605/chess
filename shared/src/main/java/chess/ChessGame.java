@@ -1,14 +1,16 @@
 package chess;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Objects;
 
 /**
  * Manages a chess game, handling turns and move validation.
  */
 public class ChessGame implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private ChessBoard board;
     private TeamColor teamTurn;
@@ -20,15 +22,11 @@ public class ChessGame implements Serializable {
     }
 
     public TeamColor getTeamTurn() { return teamTurn; }
-
     public void setTeamTurn(TeamColor team) { this.teamTurn = team; }
 
-    /**
-     * Gets valid moves for a piece, ensuring the move doesn't leave the king in check.
-     */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece piece = board.getPiece(startPosition);
-        if (piece == null) { return null; }
+        if (piece == null) return null;
 
         Collection<ChessMove> rawMoves = piece.pieceMoves(board, startPosition);
         Collection<ChessMove> legalMoves = new ArrayList<>();
@@ -46,7 +44,6 @@ public class ChessGame implements Serializable {
 
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPiece piece = board.getPiece(move.getStartPosition());
-
         validateMove(move, piece);
 
         board.addPiece(move.getEndPosition(), piece);
@@ -57,11 +54,11 @@ public class ChessGame implements Serializable {
     }
 
     private void validateMove(ChessMove move, ChessPiece piece) throws InvalidMoveException {
-        if (piece == null) { throw new InvalidMoveException("No piece"); }
-        if (piece.getTeamColor() != teamTurn) { throw new InvalidMoveException("Wrong turn"); }
+        if (piece == null) throw new InvalidMoveException("No piece");
+        if (piece.getTeamColor() != teamTurn) throw new InvalidMoveException("Wrong turn");
 
         Collection<ChessMove> legal = validMoves(move.getStartPosition());
-        if (legal == null || !legal.contains(move)) { throw new InvalidMoveException("Illegal move"); }
+        if (legal == null || !legal.contains(move)) throw new InvalidMoveException("Illegal move");
     }
 
     private void handlePromotion(ChessMove move, ChessPiece piece) {
@@ -79,37 +76,30 @@ public class ChessGame implements Serializable {
     }
 
     public boolean isInCheckmate(TeamColor teamColor) {
-        return isInCheck(teamColor) && hasAnyValidMoves(teamColor);
+        return isInCheck(teamColor) && !hasAnyValidMoves(teamColor);
     }
 
     public boolean isInStalemate(TeamColor teamColor) {
-        return !isInCheck(teamColor) && hasAnyValidMoves(teamColor);
+        return !isInCheck(teamColor) && !hasAnyValidMoves(teamColor);
     }
 
-    /**
-     * Checks if a team has any legal moves left.
-     * Consolidation of this logic fixes DuplicateBlock errors in checkmate/stalemate.
-     */
     private boolean hasAnyValidMoves(TeamColor teamColor) {
         for (int r = 1; r <= 8; r++) {
             for (int c = 1; c <= 8; c++) {
                 ChessPosition pos = new ChessPosition(r, c);
                 ChessPiece p = board.getPiece(pos);
-
                 if (p != null && p.getTeamColor() == teamColor) {
                     Collection<ChessMove> moves = validMoves(pos);
-                    if (moves != null && !moves.isEmpty()) {
-                        return false;
-                    }
+                    if (moves != null && !moves.isEmpty()) return true;
                 }
             }
         }
-        return true;
+        return false;
     }
 
     private boolean isInCheckSim(ChessBoard simBoard, TeamColor teamColor) {
         ChessPosition kingPos = findKing(simBoard, teamColor);
-        if (kingPos == null) { return false; }
+        if (kingPos == null) return false;
 
         for (int r = 1; r <= 8; r++) {
             for (int c = 1; c <= 8; c++) {
@@ -124,10 +114,10 @@ public class ChessGame implements Serializable {
 
     private boolean canPieceAttackPosition(ChessBoard b, ChessPosition piecePos, ChessPosition target, TeamColor ourColor) {
         ChessPiece p = b.getPiece(piecePos);
-        if (p == null || p.getTeamColor() == ourColor) { return false; }
+        if (p == null || p.getTeamColor() == ourColor) return false;
 
         for (ChessMove m : p.pieceMoves(b, piecePos)) {
-            if (m.getEndPosition().equals(target)) { return true; }
+            if (m.getEndPosition().equals(target)) return true;
         }
         return false;
     }
@@ -170,8 +160,8 @@ public class ChessGame implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {return true;}
-        if (o == null || getClass() != o.getClass()) {return false;}
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         ChessGame chessGame = (ChessGame) o;
         return Objects.equals(board, chessGame.board) && teamTurn == chessGame.teamTurn;
     }
