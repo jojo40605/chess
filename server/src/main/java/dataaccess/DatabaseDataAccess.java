@@ -10,10 +10,6 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Database implementation of DataAccess using JDBC and native Java serialization
- * for storing ChessGame objects.
- */
 public class DatabaseDataAccess implements DataAccess {
 
     // ===================== CLEAR =====================
@@ -29,7 +25,7 @@ public class DatabaseDataAccess implements DataAccess {
         }
     }
 
-    // ===================== USER METHODS =====================
+    // ===================== USER =====================
     @Override
     public void createUser(UserData user) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection();
@@ -52,7 +48,9 @@ public class DatabaseDataAccess implements DataAccess {
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                return new UserData(rs.getString(1), rs.getString(2), rs.getString(3));
+                return new UserData(rs.getString("username"),
+                        rs.getString("password"),
+                        rs.getString("email"));
             } else {
                 return null;
             }
@@ -61,7 +59,7 @@ public class DatabaseDataAccess implements DataAccess {
         }
     }
 
-    // ===================== AUTH METHODS =====================
+    // ===================== AUTH =====================
     @Override
     public void createAuth(AuthData auth) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection();
@@ -83,7 +81,8 @@ public class DatabaseDataAccess implements DataAccess {
             stmt.setString(1, authToken);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                return new AuthData(rs.getString(1), rs.getString(2));
+                return new AuthData(rs.getString("token"),
+                        rs.getString("username"));
             } else {
                 return null;
             }
@@ -104,7 +103,7 @@ public class DatabaseDataAccess implements DataAccess {
         }
     }
 
-    // ===================== GAME METHODS =====================
+    // ===================== GAMES =====================
     @Override
     public int createGame(GameData game) throws DataAccessException {
         int gameID = 0;
@@ -126,9 +125,10 @@ public class DatabaseDataAccess implements DataAccess {
                 }
             }
 
-        } catch (SQLException ex) {
-            throw new DataAccessException("Failed to create game", ex);
+        } catch (SQLException e) {
+            throw new DataAccessException("Failed to create game", e);
         }
+
         return gameID;
     }
 
@@ -137,8 +137,10 @@ public class DatabaseDataAccess implements DataAccess {
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(
                      "SELECT id, whiteUsername, blackUsername, gameName, gameState FROM games WHERE id = ?")) {
+
             stmt.setInt(1, gameID);
             ResultSet rs = stmt.executeQuery();
+
             if (rs.next()) {
                 return new GameData(
                         rs.getInt("id"),
@@ -150,6 +152,7 @@ public class DatabaseDataAccess implements DataAccess {
             } else {
                 return null;
             }
+
         } catch (SQLException e) {
             throw new DataAccessException("Failed to get game", e);
         }
@@ -160,7 +163,10 @@ public class DatabaseDataAccess implements DataAccess {
         List<GameData> games = new ArrayList<>();
         try (Connection conn = DatabaseManager.getConnection();
              Statement stmt = conn.createStatement()) {
-            ResultSet rs = stmt.executeQuery("SELECT id, whiteUsername, blackUsername, gameName, gameState FROM games");
+
+            ResultSet rs = stmt.executeQuery(
+                    "SELECT id, whiteUsername, blackUsername, gameName, gameState FROM games");
+
             while (rs.next()) {
                 games.add(new GameData(
                         rs.getInt("id"),
@@ -170,6 +176,7 @@ public class DatabaseDataAccess implements DataAccess {
                         deserializeChessGame(rs.getBytes("gameState"))
                 ));
             }
+
         } catch (SQLException e) {
             throw new DataAccessException("Failed to list games", e);
         }
@@ -181,12 +188,15 @@ public class DatabaseDataAccess implements DataAccess {
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(
                      "UPDATE games SET whiteUsername = ?, blackUsername = ?, gameName = ?, gameState = ? WHERE id = ?")) {
+
             stmt.setString(1, game.whiteUsername());
             stmt.setString(2, game.blackUsername());
             stmt.setString(3, game.gameName());
             stmt.setBytes(4, serializeChessGame(game.game()));
             stmt.setInt(5, game.gameID());
+
             stmt.executeUpdate();
+
         } catch (SQLException e) {
             throw new DataAccessException("Failed to update game", e);
         }
@@ -195,9 +205,8 @@ public class DatabaseDataAccess implements DataAccess {
     // ===================== SERIALIZATION HELPERS =====================
     private byte[] serializeChessGame(ChessGame game) throws DataAccessException {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-             ObjectOutputStream oos = new ObjectOutputStream(bos)) {
-            oos.writeObject(game);
-            oos.flush();
+             ObjectOutputStream out = new ObjectOutputStream(bos)) {
+            out.writeObject(game);
             return bos.toByteArray();
         } catch (IOException e) {
             throw new DataAccessException("Failed to serialize ChessGame", e);
@@ -205,9 +214,10 @@ public class DatabaseDataAccess implements DataAccess {
     }
 
     private ChessGame deserializeChessGame(byte[] data) throws DataAccessException {
+        if (data == null) return null;
         try (ByteArrayInputStream bis = new ByteArrayInputStream(data);
-             ObjectInputStream ois = new ObjectInputStream(bis)) {
-            return (ChessGame) ois.readObject();
+             ObjectInputStream in = new ObjectInputStream(bis)) {
+            return (ChessGame) in.readObject();
         } catch (IOException | ClassNotFoundException e) {
             throw new DataAccessException("Failed to deserialize ChessGame", e);
         }
