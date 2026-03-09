@@ -29,14 +29,17 @@ public class JoinGameHandler {
             JoinGameRequest request = parseRequest(ctx);
             String authToken = getAuthToken(ctx);
 
-            // Delegate to service for business logic
             gameService.joinGame(authToken, request.gameID(), request.playerColor());
 
-            // Return success response
             ctx.status(200);
             ctx.result("{}");
 
-        } catch (Exception e) {
+        }
+        catch (dataaccess.DataAccessException e) {
+            ctx.status(500);
+            ctx.json(new ErrorResult("Error: " + e.getMessage()));
+        }
+        catch (Exception e) {
             handleError(ctx, e);
         }
     }
