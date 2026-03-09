@@ -1,5 +1,6 @@
 package chess;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -7,7 +8,7 @@ import java.util.Objects;
 /**
  * Manages a chess game, handling turns and move validation.
  */
-public class ChessGame {
+public class ChessGame implements Serializable {
 
     private ChessBoard board;
     private TeamColor teamTurn;
