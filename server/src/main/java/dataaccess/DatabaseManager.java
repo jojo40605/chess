@@ -79,8 +79,8 @@ public class DatabaseManager {
         String createGames =
                 "CREATE TABLE IF NOT EXISTS games (" +
                         "id INT AUTO_INCREMENT PRIMARY KEY," +
-                        "whiteUsername VARCHAR(50) NOT NULL," +
-                        "blackUsername VARCHAR(50) NOT NULL," +
+                        "whiteUsername VARCHAR(50)," +
+                        "blackUsername VARCHAR(50)," +
                         "gameName VARCHAR(100)," +
                         "gameState BLOB," +
                         "FOREIGN KEY (whiteUsername) REFERENCES users(username) ON DELETE CASCADE," +
