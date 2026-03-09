@@ -20,6 +20,7 @@ public class DatabaseManager {
     private static void loadPropertiesFromResources() {
         try (InputStream propStream = Thread.currentThread()
                 .getContextClassLoader().getResourceAsStream("db.properties")) {
+
             if (propStream == null) {
                 throw new Exception("Unable to load db.properties");
             }
@@ -27,13 +28,7 @@ public class DatabaseManager {
             Properties props = new Properties();
             props.load(propStream);
 
-            databaseName = props.getProperty("db.name");
-            dbUsername = props.getProperty("db.user");
-            dbPassword = props.getProperty("db.password");
-
-            String host = props.getProperty("db.host");
-            int port = Integer.parseInt(props.getProperty("db.port"));
-            connectionUrl = String.format("jdbc:mysql://%s:%d?serverTimezone=UTC", host, port);
+            loadProperties(props);
 
         } catch (Exception ex) {
             throw new RuntimeException("Unable to process db.properties", ex);
@@ -101,5 +96,16 @@ public class DatabaseManager {
     public static void initialize() throws DataAccessException {
         createDatabase();
         initializeTables();
+    }
+
+    public static void loadProperties(Properties props) {
+        databaseName = props.getProperty("db.name");
+        dbUsername = props.getProperty("db.user");
+        dbPassword = props.getProperty("db.password");
+
+        String host = props.getProperty("db.host");
+        int port = Integer.parseInt(props.getProperty("db.port"));
+
+        connectionUrl = String.format("jdbc:mysql://%s:%d?serverTimezone=UTC", host, port);
     }
 }
