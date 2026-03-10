@@ -35,7 +35,7 @@ public class GameServiceTest {
 
     @Test
     void createGameUnauthorized() {
-        assertThrows(DataAccessException.class, () ->
+        assertThrows(UnauthorizedException.class, () ->
                 gameService.createGame("bad-token", "MyGame")
         );
     }
@@ -71,7 +71,7 @@ public class GameServiceTest {
         gameService.joinGame(validToken, id, "WHITE");
 
         // Negative: Try to join as WHITE again
-        assertThrows(DataAccessException.class, () ->
+        assertThrows(BadRequestException.class, () ->
                 gameService.joinGame(validToken, id, "WHITE")
         );
     }

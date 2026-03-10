@@ -33,7 +33,7 @@ public class UserServiceTest {
     void registerDuplicate() throws Exception {
         userService.register("bob", "pass", "email");
 
-        assertThrows(DataAccessException.class, () ->
+        assertThrows(ConflictException.class, () ->
                 userService.register("bob", "pass", "email")
         );
     }
@@ -51,7 +51,7 @@ public class UserServiceTest {
     void loginWrongPassword() throws Exception {
         userService.register("bob", "pass", "email");
 
-        assertThrows(DataAccessException.class, () ->
+        assertThrows(UnauthorizedException.class, () ->
                 userService.login("bob", "wrong")
         );
     }
@@ -67,7 +67,7 @@ public class UserServiceTest {
 
     @Test
     void logoutInvalidToken() {
-        assertThrows(DataAccessException.class, () ->
+        assertThrows(UnauthorizedException.class, () ->
                 userService.logout("invalid")
         );
     }
