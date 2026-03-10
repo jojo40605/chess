@@ -3,34 +3,35 @@ package handler;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import result.ErrorResult;
+import service.BadRequestException;
+import service.UnauthorizedException;
+import service.ConflictException;
 import dataaccess.DataAccessException;
 
 /**
- * Utility class for shared handler functionality.
+ * Utility class for consistent error handling across all handlers.
  */
 public class HandlerUtils {
 
     /**
-     * Maps exceptions to proper HTTP status codes.
-     * Server/database errors return 500; known errors get correct codes.
+     * Handles exceptions by mapping them to correct HTTP status codes.
+     *
+     * @param ctx the Javalin context
+     * @param e   the exception thrown by service or data layer
      */
     public static void handleError(Context ctx, Exception e) {
-        String message = e.getMessage() != null ? e.getMessage() : "Unknown error";
-
-        if (e instanceof DataAccessException) {
-            // Database/server errors → 500
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
-        } else if (message.toLowerCase().contains("unauthorized")) {
-            ctx.status(HttpStatus.UNAUTHORIZED);
-        } else if (message.toLowerCase().contains("already taken")) {
-            ctx.status(HttpStatus.FORBIDDEN);
-        } else if (message.toLowerCase().contains("bad request")) {
-            ctx.status(HttpStatus.BAD_REQUEST);
-        } else {
-            // Unknown exceptions → 500
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
+        switch (e) {
+            case BadRequestException badRequestException ->
+                    ctx.status(HttpStatus.BAD_REQUEST).json(new ErrorResult("Error: " + e.getMessage()));
+            case UnauthorizedException unauthorizedException ->
+                    ctx.status(HttpStatus.UNAUTHORIZED).json(new ErrorResult("Error: " + e.getMessage()));
+            case ConflictException conflictException ->
+                    ctx.status(HttpStatus.FORBIDDEN).json(new ErrorResult("Error: " + e.getMessage()));
+            case DataAccessException dataAccessException ->
+                    ctx.status(HttpStatus.INTERNAL_SERVER_ERROR).json(new ErrorResult("Error: " + e.getMessage()));
+            default ->
+                // Fallback for unknown exceptions
+                    ctx.status(HttpStatus.INTERNAL_SERVER_ERROR).json(new ErrorResult("Error: " + e.getMessage()));
         }
-
-        ctx.json(new ErrorResult("Error: " + message));
     }
 }

@@ -27,7 +27,7 @@ public class GameServiceTest {
 
     // --- Create Game Tests ---
     @Test
-    void createGameSuccess() throws DataAccessException {
+    void createGameSuccess() throws DataAccessException, UnauthorizedException, BadRequestException {
         int id = gameService.createGame(validToken, "MyGame");
         assertTrue(id > 0);
         assertNotNull(dataAccess.getGame(id));
@@ -42,7 +42,7 @@ public class GameServiceTest {
 
     // --- List Games Tests ---
     @Test
-    void listGamesSuccess() throws DataAccessException {
+    void listGamesSuccess() throws DataAccessException, UnauthorizedException, BadRequestException {
         gameService.createGame(validToken, "Game1");
         Collection<GameData> games = gameService.listGames(validToken);
         assertEquals(1, games.size());
@@ -57,7 +57,7 @@ public class GameServiceTest {
 
     // --- Join Game Tests ---
     @Test
-    void joinGameSuccess() throws DataAccessException {
+    void joinGameSuccess() throws DataAccessException, UnauthorizedException, BadRequestException {
         int id = gameService.createGame(validToken, "JoinMe");
         assertDoesNotThrow(() ->
                 gameService.joinGame(validToken, id, "WHITE")
@@ -66,7 +66,7 @@ public class GameServiceTest {
     }
 
     @Test
-    void joinGameAlreadyTaken() throws DataAccessException {
+    void joinGameAlreadyTaken() throws DataAccessException, UnauthorizedException, BadRequestException, ForbiddenException {
         int id = gameService.createGame(validToken, "FullGame");
         gameService.joinGame(validToken, id, "WHITE");
 

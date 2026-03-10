@@ -4,9 +4,12 @@ import com.google.gson.Gson;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import request.RegisterRequest;
-import result.ErrorResult;
 import result.RegisterResult;
+import result.ErrorResult;
 import service.UserService;
+import service.BadRequestException;
+import service.ConflictException;
+import service.UnauthorizedException;
 import dataaccess.DataAccessException;
 
 public class RegisterHandler {
@@ -21,27 +24,19 @@ public class RegisterHandler {
     public void handle(Context ctx) {
         try {
             RegisterRequest request = gson.fromJson(ctx.body(), RegisterRequest.class);
-
             var authData = userService.register(
-                    request.username(),
-                    request.password(),
-                    request.email()
+                    request.username(), request.password(), request.email()
             );
 
             ctx.status(HttpStatus.OK);
             ctx.json(new RegisterResult(authData.username(), authData.authToken()));
 
-        } catch (Exception e) {
-            String message = e.getMessage();
-            if (message != null && message.toLowerCase().contains("already taken")) {
-                ctx.status(HttpStatus.FORBIDDEN);
-                ctx.json(new ErrorResult("Error: " + message));
-            } else if (e instanceof DataAccessException) {
-                HandlerUtils.handleError(ctx, e);
-            } else {
-                ctx.status(HttpStatus.BAD_REQUEST);
-                ctx.json(new ErrorResult("Error: " + message));
-            }
+        } catch (BadRequestException e) {
+            ctx.status(HttpStatus.BAD_REQUEST).json(new ErrorResult("Error: " + e.getMessage()));
+        } catch (ConflictException e) {
+            ctx.status(HttpStatus.FORBIDDEN).json(new ErrorResult("Error: " + e.getMessage()));
+        } catch (DataAccessException e) {
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR).json(new ErrorResult("Error: " + e.getMessage()));
         }
     }
 }

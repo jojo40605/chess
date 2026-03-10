@@ -2,10 +2,13 @@ package handler;
 
 import com.google.gson.Gson;
 import io.javalin.http.Context;
+import io.javalin.http.HttpStatus;
 import request.CreateGameRequest;
 import result.CreateGameResult;
 import result.ErrorResult;
 import service.GameService;
+import service.BadRequestException;
+import service.UnauthorizedException;
 import dataaccess.DataAccessException;
 
 public class CreateGameHandler {
@@ -22,21 +25,24 @@ public class CreateGameHandler {
             String authToken = ctx.header("Authorization");
             CreateGameRequest request = gson.fromJson(ctx.body(), CreateGameRequest.class);
 
+            if (request.gameName() == null || request.gameName().isBlank()) {
+                throw new BadRequestException("bad request");
+            }
+
             int gameID = gameService.createGame(authToken, request.gameName());
 
-            ctx.status(200);
+            ctx.status(HttpStatus.OK);
             ctx.json(new CreateGameResult(gameID));
 
+        } catch (BadRequestException e) {
+            ctx.status(HttpStatus.BAD_REQUEST)
+                    .json(new ErrorResult("Error: " + e.getMessage()));
+        } catch (UnauthorizedException e) {
+            ctx.status(HttpStatus.UNAUTHORIZED)
+                    .json(new ErrorResult("Error: " + e.getMessage()));
         } catch (DataAccessException e) {
-            HandlerUtils.handleError(ctx, e);
-        } catch (Exception e) {
-            String message = e.getMessage().toLowerCase();
-            if (message.contains("unauthorized")) {
-                ctx.status(401);
-            } else {
-                ctx.status(400);
-            }
-            ctx.json(new ErrorResult("Error: " + e.getMessage()));
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .json(new ErrorResult("Error: " + e.getMessage()));
         }
     }
 }

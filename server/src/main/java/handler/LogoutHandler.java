@@ -3,6 +3,7 @@ package handler;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import service.UserService;
+import service.UnauthorizedException;
 import dataaccess.DataAccessException;
 import result.ErrorResult;
 
@@ -17,23 +18,14 @@ public class LogoutHandler {
     public void handle(Context ctx) {
         try {
             String authToken = ctx.header("Authorization");
-
             userService.logout(authToken);
 
-            ctx.status(HttpStatus.OK);
-            ctx.result("{}");
+            ctx.status(HttpStatus.OK).result("{}");
 
+        } catch (UnauthorizedException e) {
+            ctx.status(HttpStatus.UNAUTHORIZED).json(new ErrorResult("Error: " + e.getMessage()));
         } catch (DataAccessException e) {
-            HandlerUtils.handleError(ctx, e);
-        } catch (Exception e) {
-            String message = e.getMessage();
-            if (message != null && message.toLowerCase().contains("unauthorized")) {
-                ctx.status(HttpStatus.UNAUTHORIZED);
-                ctx.json(new ErrorResult("Error: " + message));
-            } else {
-                ctx.status(HttpStatus.BAD_REQUEST);
-                ctx.json(new ErrorResult("Error: " + message));
-            }
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR).json(new ErrorResult("Error: " + e.getMessage()));
         }
     }
 }

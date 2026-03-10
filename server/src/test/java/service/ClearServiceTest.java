@@ -22,7 +22,7 @@ public class ClearServiceTest {
     }
 
     @Test
-    void clearSuccess() throws DataAccessException {
+    void clearSuccess() throws DataAccessException, UnauthorizedException {
         // 1. Manually populate dataAccess (bypasses Auth checks in GameService)
         dataAccess.createUser(new UserData("Player1", "pass", "p1@email.com"));
         dataAccess.createAuth(new AuthData("some-token", "Player1"));

@@ -17,7 +17,7 @@ public class ClearService {
      * Clears all users, games, and auth tokens from the system.
      * @throws DataAccessException if a database error occurs
      */
-    public void clear() throws DataAccessException {
+    public void clear() throws DataAccessException, UnauthorizedException {
         dataAccess.clear();
     }
 }
