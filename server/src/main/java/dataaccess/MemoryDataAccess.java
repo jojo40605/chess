@@ -79,9 +79,4 @@ public class MemoryDataAccess implements DataAccess {
         }
         games.put(game.gameID(), game);
     }
-
-    // Utility for generating new Game IDs
-    public int generateGameID() {
-        return nextGameID++;
-    }
 }

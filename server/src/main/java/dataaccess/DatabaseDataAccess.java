@@ -214,7 +214,7 @@ public class DatabaseDataAccess implements DataAccess {
     }
 
     private ChessGame deserializeChessGame(byte[] data) throws DataAccessException {
-        if (data == null) return null;
+        if (data == null) {return null;}
         try (ByteArrayInputStream bis = new ByteArrayInputStream(data);
              ObjectInputStream in = new ObjectInputStream(bis)) {
             return (ChessGame) in.readObject();

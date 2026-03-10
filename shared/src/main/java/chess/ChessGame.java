@@ -26,7 +26,7 @@ public class ChessGame implements Serializable {
 
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece piece = board.getPiece(startPosition);
-        if (piece == null) return null;
+        if (piece == null) {return null;}
 
         Collection<ChessMove> rawMoves = piece.pieceMoves(board, startPosition);
         Collection<ChessMove> legalMoves = new ArrayList<>();
@@ -54,11 +54,11 @@ public class ChessGame implements Serializable {
     }
 
     private void validateMove(ChessMove move, ChessPiece piece) throws InvalidMoveException {
-        if (piece == null) throw new InvalidMoveException("No piece");
-        if (piece.getTeamColor() != teamTurn) throw new InvalidMoveException("Wrong turn");
+        if (piece == null){ throw new InvalidMoveException("No piece");}
+        if (piece.getTeamColor() != teamTurn){ throw new InvalidMoveException("Wrong turn");}
 
         Collection<ChessMove> legal = validMoves(move.getStartPosition());
-        if (legal == null || !legal.contains(move)) throw new InvalidMoveException("Illegal move");
+        if (legal == null || !legal.contains(move)) {throw new InvalidMoveException("Illegal move");}
     }
 
     private void handlePromotion(ChessMove move, ChessPiece piece) {
@@ -90,7 +90,7 @@ public class ChessGame implements Serializable {
                 ChessPiece p = board.getPiece(pos);
                 if (p != null && p.getTeamColor() == teamColor) {
                     Collection<ChessMove> moves = validMoves(pos);
-                    if (moves != null && !moves.isEmpty()) return true;
+                    if (moves != null && !moves.isEmpty()) {return true;}
                 }
             }
         }
@@ -99,7 +99,7 @@ public class ChessGame implements Serializable {
 
     private boolean isInCheckSim(ChessBoard simBoard, TeamColor teamColor) {
         ChessPosition kingPos = findKing(simBoard, teamColor);
-        if (kingPos == null) return false;
+        if (kingPos == null) {return false;}
 
         for (int r = 1; r <= 8; r++) {
             for (int c = 1; c <= 8; c++) {
@@ -114,10 +114,10 @@ public class ChessGame implements Serializable {
 
     private boolean canPieceAttackPosition(ChessBoard b, ChessPosition piecePos, ChessPosition target, TeamColor ourColor) {
         ChessPiece p = b.getPiece(piecePos);
-        if (p == null || p.getTeamColor() == ourColor) return false;
+        if (p == null || p.getTeamColor() == ourColor) {return false;}
 
         for (ChessMove m : p.pieceMoves(b, piecePos)) {
-            if (m.getEndPosition().equals(target)) return true;
+            if (m.getEndPosition().equals(target)) {return true;}
         }
         return false;
     }
@@ -160,8 +160,8 @@ public class ChessGame implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {return true;}
+        if (o == null || getClass() != o.getClass()) {return false;}
         ChessGame chessGame = (ChessGame) o;
         return Objects.equals(board, chessGame.board) && teamTurn == chessGame.teamTurn;
     }
