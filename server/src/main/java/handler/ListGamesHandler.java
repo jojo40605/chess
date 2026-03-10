@@ -1,11 +1,10 @@
 package handler;
 
-import dataaccess.DataAccessException;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
-import result.ErrorResult;
 import result.ListGamesResult;
 import service.GameService;
+import dataaccess.DataAccessException;
 
 public class ListGamesHandler {
 
@@ -23,15 +22,17 @@ public class ListGamesHandler {
 
             ctx.status(HttpStatus.OK);
             ctx.json(new ListGamesResult(games));
-        }
 
-        catch (DataAccessException e) {
-            ctx.status(500);
-            ctx.json(new ErrorResult("Error: " + e.getMessage()));
-        }
-
-        catch (Exception e) {
+        } catch (DataAccessException e) {
             HandlerUtils.handleError(ctx, e);
+        } catch (Exception e) {
+            String message = e.getMessage().toLowerCase();
+            if (message.contains("unauthorized")) {
+                ctx.status(401);
+            } else {
+                ctx.status(400);
+            }
+            ctx.json(new result.ErrorResult("Error: " + e.getMessage()));
         }
     }
 }

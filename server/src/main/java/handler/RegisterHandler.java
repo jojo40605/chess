@@ -4,12 +4,11 @@ import com.google.gson.Gson;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import request.RegisterRequest;
+import result.ErrorResult;
 import result.RegisterResult;
 import service.UserService;
+import dataaccess.DataAccessException;
 
-/**
- * Handles HTTP requests to register a new user in the system.
- */
 public class RegisterHandler {
 
     private final UserService userService;
@@ -19,21 +18,10 @@ public class RegisterHandler {
         this.userService = userService;
     }
 
-    /**
-     * Processes the registration request, returns user details and an auth token on success.
-     */
     public void handle(Context ctx) {
         try {
             RegisterRequest request = gson.fromJson(ctx.body(), RegisterRequest.class);
 
-            // Validate required fields
-            if (request.username() == null || request.password() == null || request.email() == null) {
-                ctx.status(HttpStatus.BAD_REQUEST);
-                ctx.json(new result.ErrorResult("Error: missing required fields"));
-                return;
-            }
-
-            // Delegate registration to service
             var authData = userService.register(
                     request.username(),
                     request.password(),
@@ -44,8 +32,16 @@ public class RegisterHandler {
             ctx.json(new RegisterResult(authData.username(), authData.authToken()));
 
         } catch (Exception e) {
-            // Delegate exception handling to shared handler util
-            HandlerUtils.handleError(ctx, e);
+            String message = e.getMessage();
+            if (message != null && message.toLowerCase().contains("already taken")) {
+                ctx.status(HttpStatus.FORBIDDEN);
+                ctx.json(new ErrorResult("Error: " + message));
+            } else if (e instanceof DataAccessException) {
+                HandlerUtils.handleError(ctx, e);
+            } else {
+                ctx.status(HttpStatus.BAD_REQUEST);
+                ctx.json(new ErrorResult("Error: " + message));
+            }
         }
     }
 }

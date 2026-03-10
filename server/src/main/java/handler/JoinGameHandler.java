@@ -5,11 +5,8 @@ import io.javalin.http.Context;
 import request.JoinGameRequest;
 import result.ErrorResult;
 import service.GameService;
+import dataaccess.DataAccessException;
 
-/**
- * Handles HTTP requests to join an existing chess game.
- * Extracts auth and request data before delegation to the service layer
- */
 public class JoinGameHandler {
 
     private final GameService gameService;
@@ -19,60 +16,28 @@ public class JoinGameHandler {
         this.gameService = gameService;
     }
 
-    /**
-     * Processes the join game request and returns an empty JSON object on success.
-     *
-     * @param ctx the Javalin context for the current HTTP request
-     */
     public void handle(Context ctx) {
         try {
-            JoinGameRequest request = parseRequest(ctx);
-            String authToken = getAuthToken(ctx);
+            JoinGameRequest request = gson.fromJson(ctx.body(), JoinGameRequest.class);
+            String authToken = ctx.header("Authorization");
 
             gameService.joinGame(authToken, request.gameID(), request.playerColor());
 
             ctx.status(200);
             ctx.result("{}");
 
-        }
-        catch (dataaccess.DataAccessException e) {
-            ctx.status(500);
+        } catch (DataAccessException e) {
+            HandlerUtils.handleError(ctx, e);
+        } catch (Exception e) {
+            String message = e.getMessage().toLowerCase();
+            if (message.contains("unauthorized")) {
+                ctx.status(401);
+            } else if (message.contains("already")) {
+                ctx.status(403);
+            } else {
+                ctx.status(400);
+            }
             ctx.json(new ErrorResult("Error: " + e.getMessage()));
         }
-        catch (Exception e) {
-            handleError(ctx, e);
-        }
-    }
-
-    // ------------------- Helper Methods -------------------
-
-    /** Extracts the Authorization header from the context */
-    private String getAuthToken(Context ctx) {
-        return ctx.header("Authorization");
-    }
-
-    /** Parses the request body into a JoinGameRequest object */
-    private JoinGameRequest parseRequest(Context ctx) {
-        return gson.fromJson(ctx.body(), JoinGameRequest.class);
-    }
-
-    /** Handles exceptions and sets appropriate HTTP status codes */
-    private void handleError(Context ctx, Exception e) {
-        String message = normalizeErrorMessage(e.getMessage());
-        ctx.status(determineStatusCode(message));
-        ctx.json(new ErrorResult(message));
-    }
-
-    /** Prepends "Error: " if not already present */
-    private String normalizeErrorMessage(String message) {
-        if (message == null) {return "Error: Unknown error";}
-        return message.toLowerCase().contains("error") ? message : "Error: " + message;
-    }
-
-    /** Maps error messages to HTTP status codes */
-    private int determineStatusCode(String message) {
-        if (message.toLowerCase().contains("unauthorized")) {return 401;}
-        if (message.toLowerCase().contains("already")) {return 403;}
-        return 400; // default for other errors
     }
 }
