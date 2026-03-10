@@ -177,4 +177,21 @@ public class DatabaseDataAccessTests {
         // Ensure database is still empty/unaffected
         assertEquals(0, dataAccess.listGames().size());
     }
+
+    @Test
+    @DisplayName("Get Game Positive: Retrieve existing game")
+    public void getGamePositive() throws DataAccessException {
+        int id = dataAccess.createGame(new GameData(0, null, null, "Find Me", null));
+        GameData retrieved = dataAccess.getGame(id);
+        assertNotNull(retrieved);
+        assertEquals("Find Me", retrieved.gameName());
+    }
+
+    @Test
+    @DisplayName("Get Game Negative: Return null for non-existent ID")
+    public void getGameNegative() throws DataAccessException {
+        // ID 9999 should not exist in a fresh database
+        GameData retrieved = dataAccess.getGame(9999);
+        assertNull(retrieved, "Should return null when game ID is not found");
+    }
 }
