@@ -216,12 +216,4 @@ public class DatabaseDataAccessTests {
         assertNull(retrieved, "Should return null when game ID is not found");
     }
 
-    // ===================== DELETE AUTH NEGATIVE (FORCED FAILURE) =====================
-
-//    @Test
-//    @DisplayName("Delete Auth Negative: Null token throws exception")
-//    public void deleteAuthNegativeForced() {
-//        // Most autograders consider a "Negative" test one that triggers the catch block
-//        assertThrows(DataAccessException.class, () -> dataAccess.deleteAuth(null));
-//    }
 }
