@@ -71,7 +71,7 @@ public class GameService {
      * @return a list containing all game data
      * @throws DataAccessException if unauthorized
      */
-    public List<GameData> listGames(String authToken) throws DataAccessException {
+    public List<GameData> listGames(String authToken) throws DataAccessException, UnauthorizedException {
         validateAuth(authToken);
         return dataAccess.listGames();
     }
@@ -136,11 +136,11 @@ public class GameService {
      * @return the AuthData associated with the token
      * @throws DataAccessException if the token is invalid or missing
      */
-    private AuthData validateAuth(String authToken) throws DataAccessException {
+    private AuthData validateAuth(String authToken) throws UnauthorizedException, DataAccessException {
         AuthData auth = dataAccess.getAuth(authToken);
 
         if (auth == null) {
-            throw new DataAccessException("Error: unauthorized");
+            throw new UnauthorizedException("Error: unauthorized");
         }
 
         return auth;

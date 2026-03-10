@@ -27,6 +27,8 @@ public class ListGamesHandler {
 
         } catch (DataAccessException e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR).json(new ErrorResult("Error: " + e.getMessage()));
+        } catch (UnauthorizedException e) {
+            ctx.status(401).json(new ErrorResult("Error: " + e.getMessage()));
         }
     }
 }
