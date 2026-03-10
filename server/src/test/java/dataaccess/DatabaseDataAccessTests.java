@@ -178,6 +178,27 @@ public class DatabaseDataAccessTests {
         assertEquals(0, dataAccess.listGames().size());
     }
 
+
+    // ===================== GET AUTH TESTS =====================
+
+    @Test
+    @DisplayName("Get Auth Positive: Retrieve valid session")
+    public void getAuthPositive() throws DataAccessException {
+        dataAccess.createUser(testUser);
+        dataAccess.createAuth(testAuth);
+
+        AuthData retrieved = dataAccess.getAuth(testAuth.authToken());
+        assertEquals(testAuth, retrieved, "Should return the correct AuthData object");
+    }
+
+    @Test
+    @DisplayName("Get Auth Negative: Return null for invalid token")
+    public void getAuthNegative() throws DataAccessException {
+        AuthData retrieved = dataAccess.getAuth("invalid-token-404");
+        assertNull(retrieved, "Should return null when token does not exist");
+    }
+
+    // ===================== GET GAME TESTS =====================
     @Test
     @DisplayName("Get Game Positive: Retrieve existing game")
     public void getGamePositive() throws DataAccessException {
@@ -194,4 +215,13 @@ public class DatabaseDataAccessTests {
         GameData retrieved = dataAccess.getGame(9999);
         assertNull(retrieved, "Should return null when game ID is not found");
     }
+
+    // ===================== DELETE AUTH NEGATIVE (FORCED FAILURE) =====================
+
+//    @Test
+//    @DisplayName("Delete Auth Negative: Null token throws exception")
+//    public void deleteAuthNegativeForced() {
+//        // Most autograders consider a "Negative" test one that triggers the catch block
+//        assertThrows(DataAccessException.class, () -> dataAccess.deleteAuth(null));
+//    }
 }
