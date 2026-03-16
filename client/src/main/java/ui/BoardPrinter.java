@@ -5,14 +5,9 @@ import static ui.EscapeSequences.*;
 
 public class BoardPrinter {
 
-    // Board dimensions
-    private static final int BOARD_SIZE_IN_SQUARES = 8;
-
     public static void printBoard(ChessBoard board, ChessGame.TeamColor perspective) {
-        // Headers (a-h)
         printHeaders(perspective);
 
-        // We loop through rows based on perspective
         if (perspective == ChessGame.TeamColor.BLACK) {
             for (int r = 1; r <= 8; r++) {
                 printRow(board, r, perspective);
@@ -23,16 +18,13 @@ public class BoardPrinter {
             }
         }
 
-        // Footer (a-h)
         printHeaders(perspective);
         System.out.print(RESET_BG_COLOR + RESET_TEXT_COLOR + "\n");
     }
 
     private static void printRow(ChessBoard board, int row, ChessGame.TeamColor perspective) {
-        // 1. Print Left Border (The Number)
         System.out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + " " + row + " " + RESET_BG_COLOR);
 
-        // 2. Print Squares
         if (perspective == ChessGame.TeamColor.BLACK) {
             for (int col = 8; col >= 1; col--) {
                 printSquare(board, row, col);
@@ -43,42 +35,41 @@ public class BoardPrinter {
             }
         }
 
-        // 3. Print Right Border (The Number)
         System.out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + " " + row + " " + RESET_BG_COLOR + "\n");
     }
 
     private static void printSquare(ChessBoard board, int row, int col) {
-        // Choose BG Color: (row + col) % 2 != 0 is White in most chess setups
         if ((row + col) % 2 != 0) {
             System.out.print(SET_BG_COLOR_WHITE);
         } else {
             System.out.print(SET_BG_COLOR_BLACK);
         }
 
-        // Get piece at this position
         ChessPiece piece = board.getPiece(new ChessPosition(row, col));
 
         if (piece == null) {
-            System.out.print("   "); // Exactly three standard spaces
+            // Use the EMPTY constant from EscapeSequences for consistent width
+            System.out.print(EMPTY);
         } else {
-            printPiece(piece); // Ensure printPiece also results in 3 characters
+            printPiece(piece);
         }
     }
 
     private static void printPiece(ChessPiece piece) {
-        // Choose text color based on team
+        // We still set a text color, but the icon itself is the main visual
         String color = (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? SET_TEXT_COLOR_RED : SET_TEXT_COLOR_BLUE;
-        System.out.print(color + " " + getSymbol(piece) + " ");
+        System.out.print(color + getSymbol(piece));
     }
 
     private static String getSymbol(ChessPiece piece) {
+        boolean isWhite = piece.getTeamColor() == ChessGame.TeamColor.WHITE;
         return switch (piece.getPieceType()) {
-            case KING -> "K";
-            case QUEEN -> "Q";
-            case BISHOP -> "B";
-            case KNIGHT -> "N";
-            case ROOK -> "R";
-            case PAWN -> "P";
+            case KING -> isWhite ? WHITE_KING : BLACK_KING;
+            case QUEEN -> isWhite ? WHITE_QUEEN : BLACK_QUEEN;
+            case BISHOP -> isWhite ? WHITE_BISHOP : BLACK_BISHOP;
+            case KNIGHT -> isWhite ? WHITE_KNIGHT : BLACK_KNIGHT;
+            case ROOK -> isWhite ? WHITE_ROOK : BLACK_ROOK;
+            case PAWN -> isWhite ? WHITE_PAWN : BLACK_PAWN;
         };
     }
 
