@@ -75,7 +75,7 @@ public class BoardPrinter {
 
     private static void printHeaders(ChessGame.TeamColor perspective) {
         // Each header is exactly 3 spaces wide to match the " ♔ " icons
-        String[] headers = {" a ", " b ", " c ", " d ", " e ", " f ", " g ", " h "};
+        String[] headers = {" a  ", " b  ", " c ", " d  ", " e  ", "f  ", " g  ", " h  "};
 
         // Start with 5 spaces of grey to align with the "  row  " border
         System.out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + "     ");
@@ -87,6 +87,6 @@ public class BoardPrinter {
         }
 
         // End with 5 spaces of grey for the right border
-        System.out.print("     " + RESET_BG_COLOR + "\n");
+        System.out.print("    " + RESET_BG_COLOR + "\n");
     }
 }
