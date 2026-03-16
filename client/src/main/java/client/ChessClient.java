@@ -138,17 +138,18 @@ public class ChessClient {
     private String observeGame(String[] params) throws Exception {
         assertLoggedIn();
         if (params.length == 1) {
-            try {
-                int gameNumber = Integer.parseInt(params[0]);
-                int gameID = gameList.get(gameNumber - 1).gameID();
+            int listNumber = Integer.parseInt(params[0]);
+            int gameID = gameList.get(listNumber - 1).gameID();
 
-                server.joinGame(authToken, null, gameID);
+            // Passing 'null' here tells the server we are an observer
+            server.joinGame(authToken, null, gameID);
 
-                // TODO: Add logic to draw the board here (Phase 5 requirement)
-                return String.format("Observing game %d.", gameNumber);
-            } catch (NumberFormatException | IndexOutOfBoundsException e) {
-                throw new Exception("Invalid game number.");
-            }
+            // Draw the board
+            ChessBoard board = new ChessBoard();
+            board.resetBoard();
+            BoardPrinter.printBoard(board, ChessGame.TeamColor.WHITE);
+
+            return String.format("Observing game %d.", listNumber);
         }
         throw new Exception("Expected: observe <NUMBER>");
     }
