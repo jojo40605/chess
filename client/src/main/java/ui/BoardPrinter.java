@@ -65,6 +65,31 @@ public class BoardPrinter {
         }
     }
 
+    private static void printPiece(ChessPiece piece) {
+        // Choose text color based on team
+        String color = (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? SET_TEXT_COLOR_RED : SET_TEXT_COLOR_BLUE;
+        System.out.print(color + " " + getSymbol(piece) + " ");
+    }
 
+    private static String getSymbol(ChessPiece piece) {
+        return switch (piece.getPieceType()) {
+            case KING -> "K";
+            case QUEEN -> "Q";
+            case BISHOP -> "B";
+            case KNIGHT -> "N";
+            case ROOK -> "R";
+            case PAWN -> "P";
+        };
+    }
+
+    private static void printHeaders(ChessGame.TeamColor perspective) {
+        String[] headers = {" a ", " b ", " c ", " d ", " e ", " f ", " g ", " h "};
+        System.out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + "   ");
+        if (perspective == ChessGame.TeamColor.BLACK) {
+            for (int i = 7; i >= 0; i--) System.out.print(headers[i]);
+        } else {
+            for (int i = 0; i < 8; i++) System.out.print(headers[i]);
+        }
+        System.out.print("   " + RESET_BG_COLOR + "\n");
     }
 }
