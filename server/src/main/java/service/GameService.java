@@ -94,9 +94,7 @@ public class GameService {
         if (game == null) throw new BadRequestException("bad request");
 
         // --- REFINED OBSERVER/PLAYER LOGIC ---
-
-        // 1. If color is null or empty, it's a valid Observer join.
-        if (playerColor == null || playerColor.isBlank()) {
+        if (playerColor == null || playerColor.isBlank() || playerColor.equalsIgnoreCase("OBSERVER")) {
             return;
         }
 
