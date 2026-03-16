@@ -121,6 +121,21 @@ public class ServerFacadeTests {
         assertThrows(Exception.class, () -> facade.joinGame(auth.authToken(), "BLACK", 999999));
     }
 
+    @Test
+    @DisplayName("Negative Join Game - Color Taken")
+    void joinGameColorTaken() throws Exception {
+        var auth1 = facade.register("p1", "pass", "p1@a.com");
+        var auth2 = facade.register("p2", "pass", "p2@a.com");
+        CreateGameResult game = facade.createGame(auth1.authToken(), "One Spot Game");
+
+        facade.joinGame(auth1.authToken(), "WHITE", game.gameID());
+
+        // p2 tries to join as WHITE as well
+        assertThrows(Exception.class, () -> {
+            facade.joinGame(auth2.authToken(), "WHITE", game.gameID());
+        });
+    }
+
     // ===================== LOGOUT TESTS =====================
 
     @Test
