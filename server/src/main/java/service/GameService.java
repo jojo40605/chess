@@ -87,50 +87,41 @@ public class GameService {
     public void joinGame(String authToken, int gameID, String playerColor)
             throws BadRequestException, UnauthorizedException, DataAccessException, ForbiddenException {
 
-        // 1. Validate auth token using your existing getAuth method
-        if (authToken == null || authToken.isBlank()) {
-            throw new UnauthorizedException("unauthorized");
-        }
         AuthData auth = dataAccess.getAuth(authToken);
-        if (auth == null) {
-            throw new UnauthorizedException("unauthorized");
-        }
+        if (auth == null) throw new UnauthorizedException("unauthorized");
 
-        // 2. Get the game
         GameData game = dataAccess.getGame(gameID);
-        if (game == null) {
-            throw new BadRequestException("bad request");
+        if (game == null) throw new BadRequestException("bad request");
+
+        // --- REFINED OBSERVER/PLAYER LOGIC ---
+
+        // 1. If color is null or empty, it's a valid Observer join.
+        if (playerColor == null || playerColor.isBlank()) {
+            return;
         }
 
-        // 3. OBSERVER LOGIC: Allow join if playerColor is null or empty
-        if (playerColor == null || playerColor.isBlank()) {
-            return; // Success! No database update needed for observers in this phase.
+        // 2. If it's NOT null/blank, it MUST be exactly "WHITE" or "BLACK"
+        if (!playerColor.equalsIgnoreCase("WHITE") && !playerColor.equalsIgnoreCase("BLACK")) {
+            // This will catch "GREEN" and throw the 400 error the test wants
+            throw new BadRequestException("bad request");
         }
 
         String white = game.whiteUsername();
         String black = game.blackUsername();
         String username = auth.username();
 
-        // 4. PLAYER LOGIC: Handle White/Black slots with Rejoin support
         if (playerColor.equalsIgnoreCase("WHITE")) {
-            // If slot is taken AND it's not taken by the current user, block it.
             if (white != null && !white.equals(username)) {
                 throw new ForbiddenException("already taken");
             }
             game = new GameData(gameID, username, black, game.gameName(), game.game());
-        }
-        else if (playerColor.equalsIgnoreCase("BLACK")) {
-            // If slot is taken AND it's not taken by the current user, block it.
+        } else { // It must be BLACK here because of the check above
             if (black != null && !black.equals(username)) {
                 throw new ForbiddenException("already taken");
             }
             game = new GameData(gameID, white, username, game.gameName(), game.game());
         }
-        else {
-            throw new BadRequestException("bad request");
-        }
 
-        // 5. Update the game in the database
         dataAccess.updateGame(game);
     }
 
