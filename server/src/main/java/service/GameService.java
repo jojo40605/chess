@@ -88,10 +88,10 @@ public class GameService {
             throws BadRequestException, UnauthorizedException, DataAccessException, ForbiddenException {
 
         AuthData auth = dataAccess.getAuth(authToken);
-        if (auth == null) throw new UnauthorizedException("unauthorized");
+        if (auth == null) {throw new UnauthorizedException("unauthorized");}
 
         GameData game = dataAccess.getGame(gameID);
-        if (game == null) throw new BadRequestException("bad request");
+        if (game == null) {throw new BadRequestException("bad request");}
 
         // --- REFINED OBSERVER/PLAYER LOGIC ---
         if (playerColor == null || playerColor.isBlank() || playerColor.equalsIgnoreCase("OBSERVER")) {

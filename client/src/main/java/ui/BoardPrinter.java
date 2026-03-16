@@ -81,9 +81,9 @@ public class BoardPrinter {
         System.out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + "     ");
 
         if (perspective == ChessGame.TeamColor.BLACK) {
-            for (int i = 7; i >= 0; i--) System.out.print(headers[i]);
+            for (int i = 7; i >= 0; i--) {System.out.print(headers[i]);}
         } else {
-            for (int i = 0; i < 8; i++) System.out.print(headers[i]);
+            for (int i = 0; i < 8; i++) {System.out.print(headers[i]);}
         }
 
         // End with 5 spaces of grey for the right border
