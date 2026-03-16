@@ -9,7 +9,6 @@ import result.ErrorResult;
 import service.UserService;
 import service.BadRequestException;
 import service.ConflictException;
-import service.UnauthorizedException;
 import dataaccess.DataAccessException;
 
 public class RegisterHandler {
