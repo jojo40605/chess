@@ -142,8 +142,8 @@ public class ServerFacadeTests {
         var auth = facade.register("observer", "pass", "o@o.com");
         CreateGameResult game = facade.createGame(auth.authToken(), "Observable Game");
 
-        // Joining with null color = Observing
-        assertDoesNotThrow(() -> facade.joinGame(auth.authToken(), null, game.gameID()));
+        // Use "OBSERVER" instead of null
+        assertDoesNotThrow(() -> facade.joinGame(auth.authToken(), "OBSERVER", game.gameID()));
     }
 
     // ===================== LOGOUT TESTS =====================
