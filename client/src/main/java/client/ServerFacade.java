@@ -10,6 +10,7 @@ import java.net.*;
 public class ServerFacade {
 
     private final String serverUrl;
+    private final Gson gson = new Gson();
 
     public ServerFacade(int port) {
         this.serverUrl = "http://localhost:" + port;
@@ -64,16 +65,20 @@ public class ServerFacade {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
-            http.setDoOutput(!method.equals("GET")); // No body for GET requests
+
+            // DELETE requests in some Java versions won't allow a body unless specified
+            http.setDoOutput(!method.equals("GET"));
 
             writeHeader(authToken, http);
             writeBody(request, http);
             http.connect();
+
+            // This method now extracts the specific "Error: ..." string from the server
             throwIfNotProcessable(http);
+
             return readBody(http, responseClass);
-        } catch (Exception ex) {
-            // This catches connection issues OR the custom error from throwIfNotProcessable
-            throw new Exception(ex.getMessage());
+        } catch (IOException e) {
+            throw new Exception("Error: Cannot connect to server. Ensure it is running.");
         }
     }
 
@@ -96,17 +101,28 @@ public class ServerFacade {
     private void throwIfNotProcessable(HttpURLConnection http) throws Exception {
         var status = http.getResponseCode();
         if (status < 200 || status >= 300) {
-            // Logic to read error message from server if applicable
+            // Read from the ErrorStream to get the ErrorResult JSON
+            try (InputStream respBody = http.getErrorStream()) {
+                if (respBody != null) {
+                    InputStreamReader reader = new InputStreamReader(respBody);
+                    ErrorResult error = gson.fromJson(reader, ErrorResult.class);
+                    if (error != null && error.message() != null) {
+                        // Throw the server's clean message (e.g., "Error: unauthorized")
+                        throw new Exception(error.message());
+                    }
+                }
+            }
+            // Fallback if the error stream is empty
             throw new Exception("Error: " + status);
         }
     }
 
-    private static <T> T readBody(HttpURLConnection http, Class<T> responseClass) throws IOException {
+    private <T> T readBody(HttpURLConnection http, Class<T> responseClass) throws IOException {
         T response = null;
         if (http.getResponseCode() != HttpURLConnection.HTTP_NO_CONTENT && responseClass != null) {
             try (InputStream respBody = http.getInputStream()) {
                 InputStreamReader reader = new InputStreamReader(respBody);
-                response = new Gson().fromJson(reader, responseClass);
+                response = gson.fromJson(reader, responseClass);
             }
         }
         return response;

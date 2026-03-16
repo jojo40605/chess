@@ -9,7 +9,6 @@ import ui.BoardPrinter;
 
 import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.Collection;
 
 public class ChessClient {
     private final ServerFacade server;
@@ -17,12 +16,11 @@ public class ChessClient {
     private String authToken = null;
     private State state = State.SIGNEDOUT;
 
-    // Stores games from the last 'list' command so users can use index numbers (1, 2, 3...)
     private ArrayList<GameData> gameList = new ArrayList<>();
 
     public ChessClient(String serverUrl) {
         this.serverUrl = serverUrl;
-        // Extracts the port from the URL if needed, but defaults to 8080
+        // Ensure this port matches your ServerMain port (usually 8080)
         this.server = new ServerFacade(8080);
     }
 
@@ -44,7 +42,8 @@ public class ChessClient {
                 default -> help();
             };
         } catch (Exception e) {
-            return "Error: " + e.getMessage();
+            // Cleaned up: server-side errors already start with "Error: "
+            return e.getMessage();
         }
     }
 
@@ -55,7 +54,7 @@ public class ChessClient {
             state = State.SIGNEDIN;
             return String.format("Logged in as %s.", auth.username());
         }
-        throw new Exception("Expected: <USERNAME> <PASSWORD>");
+        throw new Exception("Error: Expected <USERNAME> <PASSWORD>");
     }
 
     private String register(String[] params) throws Exception {
@@ -65,7 +64,7 @@ public class ChessClient {
             this.state = State.SIGNEDIN;
             return String.format("Logged in as %s.", result.username());
         }
-        throw new Exception("Expected: <USERNAME> <PASSWORD> <EMAIL>");
+        throw new Exception("Error: Expected <USERNAME> <PASSWORD> <EMAIL>");
     }
 
     private String logout() throws Exception {
@@ -82,7 +81,7 @@ public class ChessClient {
             server.createGame(authToken, params[0]);
             return String.format("Game '%s' created successfully!", params[0]);
         }
-        throw new Exception("Expected: create <NAME>");
+        throw new Exception("Error: Expected create <NAME>");
     }
 
     private String listGames() throws Exception {
@@ -117,22 +116,18 @@ public class ChessClient {
 
                 server.joinGame(authToken, color, gameID);
 
-                // 1. Create a starting board
                 ChessBoard board = new ChessBoard();
                 board.resetBoard();
 
-                // 2. Determine color for perspective
                 ChessGame.TeamColor perspective = color.equals("WHITE") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
-
-                // 3. Print it!
                 BoardPrinter.printBoard(board, perspective);
 
                 return String.format("Joined game %d as %s.", gameNumber, color);
             } catch (NumberFormatException | IndexOutOfBoundsException e) {
-                throw new Exception("Invalid game number. Use 'list' to see valid numbers.");
+                throw new Exception("Error: Invalid game number. Use 'list' to see valid numbers.");
             }
         }
-        throw new Exception("Expected: join <NUMBER> [WHITE|BLACK]");
+        throw new Exception("Error: Expected join <NUMBER> [WHITE|BLACK]");
     }
 
     private String observeGame(String[] params) throws Exception {
@@ -140,17 +135,13 @@ public class ChessClient {
         if (params.length == 1) {
             try {
                 int gameNumber = Integer.parseInt(params[0]);
-                // Retrieve actual gameID from your local gameList
                 int gameID = gameList.get(gameNumber - 1).gameID();
 
-                // Use the "OBSERVER" keyword to satisfy the Handler and Service logic
+                // Send "OBSERVER" to satisfy the server's validation
                 server.joinGame(authToken, "OBSERVER", gameID);
 
-                // 1. Create a starting board
                 ChessBoard board = new ChessBoard();
                 board.resetBoard();
-
-                // 2. Print it (Observers usually default to WHITE perspective)
                 BoardPrinter.printBoard(board, ChessGame.TeamColor.WHITE);
 
                 return String.format("Observing game %d.", gameNumber);
@@ -159,12 +150,12 @@ public class ChessClient {
                 throw new Exception("Error: Invalid game number. Use 'list' to see valid numbers.");
             }
         }
-        throw new Exception("Expected: observe <NUMBER>");
+        throw new Exception("Error: Expected observe <NUMBER>");
     }
 
     private void assertLoggedIn() throws Exception {
         if (state == State.SIGNEDOUT) {
-            throw new Exception("You must be logged in to do that.");
+            throw new Exception("Error: You must be logged in to do that.");
         }
     }
 
