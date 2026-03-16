@@ -136,6 +136,16 @@ public class ServerFacadeTests {
         });
     }
 
+    @Test
+    @DisplayName("Positive Observe Game")
+    void observeGameSuccess() throws Exception {
+        var auth = facade.register("observer", "pass", "o@o.com");
+        CreateGameResult game = facade.createGame(auth.authToken(), "Observable Game");
+
+        // Joining with null color = Observing
+        assertDoesNotThrow(() -> facade.joinGame(auth.authToken(), null, game.gameID()));
+    }
+
     // ===================== LOGOUT TESTS =====================
 
     @Test
