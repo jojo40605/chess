@@ -22,12 +22,30 @@ public class JoinGameHandler {
             JoinGameRequest request = gson.fromJson(ctx.body(), JoinGameRequest.class);
             String authToken = ctx.header("Authorization");
 
-            // --- UPDATED VALIDATION ---
+            // 1. Basic Structure Check
             if (request == null || request.gameID() == null) {
                 throw new BadRequestException("bad request");
             }
 
-            gameService.joinGame(authToken, request.gameID(), request.playerColor());
+            // 2. Strict Color Check for Standard API Tests
+            String color = request.playerColor();
+
+            // The tests fail if color is null, empty, or not WHITE/BLACK.
+            // Note: We allow "OBSERVER" here for your own client's functionality.
+            if (color == null || color.isBlank()) {
+                throw new BadRequestException("bad request");
+            }
+
+            boolean isWhite = color.equalsIgnoreCase("WHITE");
+            boolean isBlack = color.equalsIgnoreCase("BLACK");
+            boolean isObserver = color.equalsIgnoreCase("OBSERVER");
+
+            if (!isWhite && !isBlack && !isObserver) {
+                throw new BadRequestException("bad request");
+            }
+
+            // 3. Call Service
+            gameService.joinGame(authToken, request.gameID(), color);
 
             ctx.status(HttpStatus.OK).result("{}");
 
