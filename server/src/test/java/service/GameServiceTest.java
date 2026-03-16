@@ -50,7 +50,8 @@ public class GameServiceTest {
 
     @Test
     void listGamesUnauthorized() {
-        assertThrows(DataAccessException.class, () ->
+        // Change DataAccessException.class to UnauthorizedException.class
+        assertThrows(UnauthorizedException.class, () ->
                 gameService.listGames("bad-token")
         );
     }
@@ -70,9 +71,13 @@ public class GameServiceTest {
         int id = gameService.createGame(validToken, "FullGame");
         gameService.joinGame(validToken, id, "WHITE");
 
-        // Negative: Try to join as WHITE again
-        assertThrows(BadRequestException.class, () ->
-                gameService.joinGame(validToken, id, "WHITE")
+        // Setup a SECOND user
+        String secondToken = "other-token";
+        dataAccess.createAuth(new AuthData(secondToken, "player2"));
+
+        // Negative: player2 tries to take player1's spot
+        assertThrows(ForbiddenException.class, () ->
+                gameService.joinGame(secondToken, id, "WHITE")
         );
     }
 
