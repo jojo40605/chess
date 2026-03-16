@@ -50,13 +50,13 @@ public class JoinGameHandler {
             ctx.status(HttpStatus.OK).result("{}");
 
         } catch (UnauthorizedException e) {
-            ctx.status(HttpStatus.UNAUTHORIZED).json(new ErrorResult("Error: " + e.getMessage()));
+            ctx.status(401).json(new ErrorResult("Error: unauthorized"));
         } catch (ForbiddenException e) {
-            ctx.status(HttpStatus.FORBIDDEN).json(new ErrorResult("Error: " + e.getMessage()));
+            ctx.status(HttpStatus.FORBIDDEN).json(new ErrorResult("Error: Forbidden"));
         } catch (BadRequestException e) {
-            ctx.status(HttpStatus.BAD_REQUEST).json(new ErrorResult("Error: " + e.getMessage()));
+            ctx.status(HttpStatus.BAD_REQUEST).json(new ErrorResult("Error: Bad Request"));
         } catch (DataAccessException e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR).json(new ErrorResult("Error: " + e.getMessage()));
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR).json(new ErrorResult("Error: Internal Server Error"));
         }
     }
 }

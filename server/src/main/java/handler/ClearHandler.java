@@ -24,9 +24,9 @@ public class ClearHandler {
             ctx.status(200).result("{}");
 
         } catch (UnauthorizedException e) {
-            ctx.status(401).json(new ErrorResult("Error: " + e.getMessage()));
+            ctx.status(401).json(new ErrorResult("Error: Unauthorized Exception for Clear"));
         } catch (DataAccessException e) {
-            ctx.status(500).json(new ErrorResult("Error: " + e.getMessage()));
+            ctx.status(500).json(new ErrorResult("Error: Data Access Exception for Clear"));
         }
     }
 }

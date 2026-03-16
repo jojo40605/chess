@@ -138,18 +138,26 @@ public class ChessClient {
     private String observeGame(String[] params) throws Exception {
         assertLoggedIn();
         if (params.length == 1) {
-            int listNumber = Integer.parseInt(params[0]);
-            int gameID = gameList.get(listNumber - 1).gameID();
+            try {
+                int gameNumber = Integer.parseInt(params[0]);
+                // Retrieve actual gameID from your local gameList
+                int gameID = gameList.get(gameNumber - 1).gameID();
 
-            // Passing 'null' here tells the server we are an observer
-            server.joinGame(authToken, null, gameID);
+                // Use the "OBSERVER" keyword to satisfy the Handler and Service logic
+                server.joinGame(authToken, "OBSERVER", gameID);
 
-            // Draw the board
-            ChessBoard board = new ChessBoard();
-            board.resetBoard();
-            BoardPrinter.printBoard(board, ChessGame.TeamColor.WHITE);
+                // 1. Create a starting board
+                ChessBoard board = new ChessBoard();
+                board.resetBoard();
 
-            return String.format("Observing game %d.", listNumber);
+                // 2. Print it (Observers usually default to WHITE perspective)
+                BoardPrinter.printBoard(board, ChessGame.TeamColor.WHITE);
+
+                return String.format("Observing game %d.", gameNumber);
+
+            } catch (NumberFormatException | IndexOutOfBoundsException e) {
+                throw new Exception("Error: Invalid game number. Use 'list' to see valid numbers.");
+            }
         }
         throw new Exception("Expected: observe <NUMBER>");
     }

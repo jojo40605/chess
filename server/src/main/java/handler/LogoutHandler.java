@@ -23,9 +23,9 @@ public class LogoutHandler {
             ctx.status(HttpStatus.OK).result("{}");
 
         } catch (UnauthorizedException e) {
-            ctx.status(HttpStatus.UNAUTHORIZED).json(new ErrorResult("Error: " + e.getMessage()));
+            ctx.status(HttpStatus.UNAUTHORIZED).json(new ErrorResult("Error: Unauthorized"));
         } catch (DataAccessException e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR).json(new ErrorResult("Error: " + e.getMessage()));
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR).json(new ErrorResult("Error: Internal Server Error"));
         }
     }
 }

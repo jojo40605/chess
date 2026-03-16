@@ -36,13 +36,13 @@ public class CreateGameHandler {
 
         } catch (BadRequestException e) {
             ctx.status(HttpStatus.BAD_REQUEST)
-                    .json(new ErrorResult("Error: " + e.getMessage()));
+                    .json(new ErrorResult("Error: Bad request"));
         } catch (UnauthorizedException e) {
             ctx.status(HttpStatus.UNAUTHORIZED)
-                    .json(new ErrorResult("Error: " + e.getMessage()));
+                    .json(new ErrorResult("Error: Unauthorized Exception"));
         } catch (DataAccessException e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .json(new ErrorResult("Error: " + e.getMessage()));
+                    .json(new ErrorResult("Error: Internal Server Error"));
         }
     }
 }

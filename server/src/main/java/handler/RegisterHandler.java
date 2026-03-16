@@ -31,11 +31,11 @@ public class RegisterHandler {
             ctx.json(new RegisterResult(authData.username(), authData.authToken()));
 
         } catch (BadRequestException e) {
-            ctx.status(HttpStatus.BAD_REQUEST).json(new ErrorResult("Error: " + e.getMessage()));
+            ctx.status(HttpStatus.BAD_REQUEST).json(new ErrorResult("Error: Bad Request"));
         } catch (ConflictException e) {
-            ctx.status(HttpStatus.FORBIDDEN).json(new ErrorResult("Error: " + e.getMessage()));
+            ctx.status(HttpStatus.FORBIDDEN).json(new ErrorResult("Error: Forbidden"));
         } catch (DataAccessException e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR).json(new ErrorResult("Error: " + e.getMessage()));
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR).json(new ErrorResult("Error: Internal Server Error"));
         }
     }
 }
