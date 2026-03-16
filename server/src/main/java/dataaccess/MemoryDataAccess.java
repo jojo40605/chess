@@ -58,8 +58,23 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public int createGame(GameData game) {
-        games.put(game.gameID(), game);
-        return game.gameID();
+        // 1. Create a new GameData instance using the auto-incremented ID
+        GameData gameWithId = new GameData(
+                nextGameID,
+                game.whiteUsername(),
+                game.blackUsername(),
+                game.gameName(),
+                game.game()
+        );
+
+        // 2. Save it using the new ID
+        games.put(nextGameID, gameWithId);
+
+        // 3. Store the ID to return, then increment the counter
+        int assignedId = nextGameID;
+        nextGameID++;
+
+        return assignedId;
     }
 
     @Override
