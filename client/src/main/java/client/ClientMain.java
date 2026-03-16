@@ -1,10 +1,16 @@
 package client;
 
-import chess.*;
-
 public class ClientMain {
     public static void main(String[] args) {
-        var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
-        System.out.println("♕ 240 Chess Client: " + piece);
+        // Default to localhost:8080, but allow override via arguments
+        var serverUrl = "http://localhost:8080";
+        if (args.length == 1) {
+            serverUrl = args[0];
+        }
+
+        System.out.println("♕ Welcome to 240 Chess Client ♕");
+
+        // This starts the infinite loop
+        new Repl(serverUrl).run();
     }
 }

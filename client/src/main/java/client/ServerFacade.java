@@ -17,10 +17,10 @@ public class ServerFacade {
 
     // ===================== PRE-LOGIN =====================
 
-    public AuthData register(String username, String password, String email) throws Exception {
+    public RegisterResult register(String username, String password, String email) throws Exception {
         var path = "/user";
         var request = new RegisterRequest(username, password, email);
-        return this.makeRequest("POST", path, request, AuthData.class, null);
+        return this.makeRequest("POST", path, request, RegisterResult.class, null);
     }
 
     public AuthData login(String username, String password) throws Exception {
