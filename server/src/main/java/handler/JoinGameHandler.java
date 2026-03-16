@@ -22,9 +22,8 @@ public class JoinGameHandler {
             JoinGameRequest request = gson.fromJson(ctx.body(), JoinGameRequest.class);
             String authToken = ctx.header("Authorization");
 
-            // --- VALIDATION ---
-            if (request == null || request.gameID() == null || request.playerColor() == null
-                    || request.playerColor().isBlank()) {
+            // --- UPDATED VALIDATION ---
+            if (request == null || request.gameID() == null) {
                 throw new BadRequestException("bad request");
             }
 
