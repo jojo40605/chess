@@ -47,5 +47,24 @@ public class BoardPrinter {
         System.out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK + " " + row + " " + RESET_BG_COLOR + "\n");
     }
 
+    private static void printSquare(ChessBoard board, int row, int col) {
+        // Choose BG Color: (row + col) % 2 != 0 is White in most chess setups
+        if ((row + col) % 2 != 0) {
+            System.out.print(SET_BG_COLOR_WHITE);
+        } else {
+            System.out.print(SET_BG_COLOR_BLACK);
+        }
 
+        // Get piece at this position
+        ChessPiece piece = board.getPiece(new ChessPosition(row, col));
+
+        if (piece == null) {
+            System.out.print("   "); // Exactly three standard spaces
+        } else {
+            printPiece(piece); // Ensure printPiece also results in 3 characters
+        }
+    }
+
+
+    }
 }
