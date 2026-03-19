@@ -14,6 +14,7 @@ public class ChessGame implements Serializable {
 
     private ChessBoard board;
     private TeamColor teamTurn;
+    private boolean isGameOver = false;
 
     public ChessGame() {
         board = new ChessBoard();
@@ -43,6 +44,11 @@ public class ChessGame implements Serializable {
     }
 
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        // 1. Check if the game is already over (Resignation/Checkmate/Stalemate)
+        if (isGameOver) {
+            throw new InvalidMoveException("Game is over.");
+        }
+
         ChessPiece piece = board.getPiece(move.getStartPosition());
         validateMove(move, piece);
 
@@ -51,6 +57,12 @@ public class ChessGame implements Serializable {
 
         handlePromotion(move, piece);
         switchTurn();
+
+        // 2. Check if this move ended the game
+        if (isInCheckmate(TeamColor.WHITE) || isInCheckmate(TeamColor.BLACK) ||
+                isInStalemate(TeamColor.WHITE) || isInStalemate(TeamColor.BLACK)) {
+            isGameOver = true;
+        }
     }
 
     private void validateMove(ChessMove move, ChessPiece piece) throws InvalidMoveException {
@@ -158,16 +170,28 @@ public class ChessGame implements Serializable {
     public void setBoard(ChessBoard board) { this.board = board; }
     public ChessBoard getBoard() { return board; }
 
+    public boolean isGameOver() {
+        return isGameOver;
+    }
+
+    public void setGameOver(boolean isGameOver) {
+        this.isGameOver = isGameOver;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {return true;}
         if (o == null || getClass() != o.getClass()) {return false;}
         ChessGame chessGame = (ChessGame) o;
-        return Objects.equals(board, chessGame.board) && teamTurn == chessGame.teamTurn;
+        return isGameOver == chessGame.isGameOver &&
+                Objects.equals(board, chessGame.board) &&
+                teamTurn == chessGame.teamTurn;
     }
 
     @Override
-    public int hashCode() { return Objects.hash(board, teamTurn); }
+    public int hashCode() {
+        return Objects.hash(board, teamTurn, isGameOver);
+    }
 
     public enum TeamColor { WHITE, BLACK }
 }

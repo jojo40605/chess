@@ -5,6 +5,8 @@ import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import model.AuthData;
 import model.GameData;
+import websocket.WebSocketHandler;
+
 import java.util.List;
 
 /**
@@ -138,5 +140,9 @@ public class GameService {
         }
 
         return auth;
+    }
+
+    public DataAccess getDataAccess() {
+        return this.dataAccess;
     }
 }
