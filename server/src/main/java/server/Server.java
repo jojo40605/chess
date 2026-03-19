@@ -8,6 +8,7 @@ import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JsonMapper;
 import org.jetbrains.annotations.NotNull;
 import service.*;
+import websocket.WebSocketHandler;
 
 import java.lang.reflect.Type;
 
@@ -51,6 +52,8 @@ public class Server {
         GameService gameService = new GameService(dataAccess);
         var clearService = new ClearService(dataAccess);
 
+        var wsHandler = new WebSocketHandler(gameService);
+
         // 2. Initialize Handlers
         var registerHandler = new RegisterHandler(userService);
         var loginHandler = new LoginHandler(userService);
@@ -68,6 +71,8 @@ public class Server {
         javalin.post("/game", createGameHandler::handle);
         javalin.put("/game", joinGameHandler::handle);
         javalin.delete("/db", clearHandler::handle);
+
+        javalin.ws("/ws", wsHandler::configure);
     }
 
     public int run(int desiredPort) {
