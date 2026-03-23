@@ -2,12 +2,11 @@ package client;
 
 import com.google.gson.Gson;
 import websocket.commands.UserGameCommand;
-import websocket.messages.ServerMessage;
+import websocket.messages.*;
 
 import jakarta.websocket.*;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 
 public class WebSocketFacade extends Endpoint {
 
@@ -17,30 +16,50 @@ public class WebSocketFacade extends Endpoint {
 
     public WebSocketFacade(String url, ServerMessageObserver observer) throws Exception {
         try {
+            // 1. Clean up the URL (Make it protocol-agnostic)
             url = url.replace("http", "ws");
-            URI socketUri = new URI(url + "/ws");
+            if (!url.endsWith("/ws")) {
+                url = url + "/ws";
+            }
+            URI socketUri = new URI(url);
             this.observer = observer;
 
+            // 2. Establish connection
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, socketUri);
 
-            // Set up a message handler to receive messages from the server
+            // 3. The "Detective" Message Handler
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
-                    // Convert JSON back to a ServerMessage and tell the observer (UI)
-                    ServerMessage serverMessage = gson.fromJson(message, ServerMessage.class);
-                    observer.notify(serverMessage);
+                    // Pass 1: Parse as base class to find the type
+                    ServerMessage baseMessage = gson.fromJson(message, ServerMessage.class);
+
+                    // Pass 2: Re-parse into the actual specific class
+                    switch (baseMessage.getServerMessageType()) {
+                        case LOAD_GAME -> {
+                            LoadGameMessage loadMsg = gson.fromJson(message, LoadGameMessage.class);
+                            observer.notify(loadMsg);
+                        }
+                        case NOTIFICATION -> {
+                            NotificationMessage notificationMsg = gson.fromJson(message, NotificationMessage.class);
+                            observer.notify(notificationMsg);
+                        }
+                        case ERROR -> {
+                            ErrorMessage errorMsg = gson.fromJson(message, ErrorMessage.class);
+                            observer.notify(errorMsg);
+                        }
+                    }
                 }
             });
-        } catch (DeploymentException | URISyntaxException | IOException e) {
+        } catch (Exception e) {
             throw new Exception("Error: Failed to connect to WebSocket: " + e.getMessage());
         }
     }
 
-    // Standard Endpoint method - called when connection is established
     @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) {
+        // Connection established!
     }
 
     /**
@@ -52,5 +71,16 @@ public class WebSocketFacade extends Endpoint {
         } catch (IOException e) {
             throw new Exception("Error: Failed to send command: " + e.getMessage());
         }
+    }
+
+    @Override
+    public void onClose(Session session, CloseReason closeReason) {
+        // Optional: you could notify the observer here if you want to update the UI state
+    }
+
+    @Override
+    public void onError(Session session, Throwable throwable) {
+        // Log errors to console so you can see why the pipe broke
+        System.err.println("WebSocket Error: " + throwable.getMessage());
     }
 }
