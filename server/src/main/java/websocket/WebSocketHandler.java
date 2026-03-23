@@ -135,17 +135,28 @@ public class WebSocketHandler {
     private void leave(WsMessageContext ctx, UserGameCommand command) {
         try {
             AuthData auth = validateToken(command.getAuthToken());
-            GameData game = getGame(command.getGameID());
+            GameData gameData = getGame(command.getGameID());
+            String username = auth.username();
 
-            // Remove from DB (if player)
-            // if (auth.username().equals(game.whiteUsername())) { ... update DB ... }
+            // 1. Remove the player from the specific team slot in the GameData
+            if (username.equals(gameData.whiteUsername())) {
+                gameData = new GameData(gameData.gameID(), null, gameData.blackUsername(), gameData.gameName(), gameData.game());
+            } else if (username.equals(gameData.blackUsername())) {
+                gameData = new GameData(gameData.gameID(), gameData.whiteUsername(), null, gameData.gameName(), gameData.game());
+            }
 
+            // 2. Update the Database
+            gameService.getDataAccess().updateGame(gameData);
+
+            // 3. Clean up the connection
             connections.remove(command.getGameID(), command.getAuthToken());
-            String message = String.format("%s has left the game", auth.username());
+
+            // 4. Notify everyone else
+            String message = String.format("%s has left the game.", username);
             connections.broadcast(command.getGameID(), command.getAuthToken(), new NotificationMessage(message));
 
         } catch (Exception e) {
-            sendError(ctx, "Error: " + e.getMessage());
+            sendError(ctx, e.getMessage());
         }
     }
 
@@ -153,24 +164,28 @@ public class WebSocketHandler {
         try {
             AuthData auth = validateToken(command.getAuthToken());
             GameData gameData = getGame(command.getGameID());
+            String username = auth.username();
 
+            // 1. Validation: Only players can resign (Observers cannot)
+            if (!username.equals(gameData.whiteUsername()) && !username.equals(gameData.blackUsername())) {
+                throw new Exception("Error: Observers cannot resign.");
+            }
+
+            // 2. Validation: Cannot resign if the game is already over
             if (gameData.game().isGameOver()) {
-                throw new Exception("Game is already over.");
+                throw new Exception("Error: The game is already over.");
             }
 
-            // Verify the person resigning is a player, not an observer
-            if (!auth.username().equals(gameData.whiteUsername()) && !auth.username().equals(gameData.blackUsername())) {
-                throw new Exception("Observers cannot resign.");
-            }
-
+            // 3. Update the game state
             gameData.game().setGameOver(true);
-            // gameService.updateGame(gameData);
+            gameService.getDataAccess().updateGame(gameData);
 
-            String message = String.format("%s has resigned. The game is over.", auth.username());
+            // 4. Broadcast to EVERYONE (including the root client)
+            String message = String.format("%s has resigned. The game is over.", username);
             connections.broadcast(command.getGameID(), null, new NotificationMessage(message));
 
         } catch (Exception e) {
-            sendError(ctx, "Error: " + e.getMessage());
+            sendError(ctx, e.getMessage());
         }
     }
 
