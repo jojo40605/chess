@@ -337,6 +337,9 @@ public class ChessClient implements ServerMessageObserver{
         return "Left the game.";
     }
     private String resign() throws Exception {
+        if (isObserver) {
+            throw new Exception("Error: You are observing this game and cannot resign.");
+        }
         System.out.print("Are you sure you want to resign? (yes/no): ");
         java.util.Scanner scanner = new java.util.Scanner(System.in);
         String response = scanner.nextLine().toLowerCase();
