@@ -25,6 +25,7 @@ public class ChessClient implements ServerMessageObserver{
     private Integer currentGameID = null;
     private ChessGame.TeamColor playerColor = null;
     private GameData lastGame = null;
+    private boolean isObserver = false; // Add this line
 
     public ChessClient(String serverUrl) {
         this.serverUrl = serverUrl;
@@ -146,6 +147,7 @@ public class ChessClient implements ServerMessageObserver{
 
                 // 3. Update Local State: Remember who we are for this session
                 this.currentGameID = gameID;
+                this.isObserver = false; // Set to false here
                 this.playerColor = colorStr.equals("WHITE") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
                 this.state = State.GAMEPLAY; // Switches your eval() switch to gameplay mode
 
@@ -172,6 +174,7 @@ public class ChessClient implements ServerMessageObserver{
                 this.currentGameID = gameID;
                 this.playerColor = ChessGame.TeamColor.WHITE; // Observers see White on bottom
                 this.state = State.GAMEPLAY;
+                this.isObserver = true; // Set to true here
 
                 ws.sendCommand(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID));
 
@@ -199,14 +202,22 @@ public class ChessClient implements ServerMessageObserver{
                 """;
         }
         if (state == State.GAMEPLAY) {
-            return """
+            if (isObserver) {
+                return """
             redraw - to see the board again
-            make <START> <END> - to move (e.g., make e2 e4)
+            leave - return to lobby
+            help - see commands
+            """;
+            } else {
+                return """
+            redraw - to see the board again
+            make <START> <END> - to move
             highlight <POSITION> - see legal moves
             resign - forfeit the game
             leave - return to lobby
             help - see commands
             """;
+            }
         }
         return """
             create <NAME> - a game
@@ -274,6 +285,10 @@ public class ChessClient implements ServerMessageObserver{
 
     private String makeMove(String[] params) throws Exception {
         assertLoggedIn();
+
+        if (isObserver) {
+            throw new Exception("Error: You are observing this game and cannot make moves.");
+        }
 
         // Validate basic input length
         if (params.length < 2) {
