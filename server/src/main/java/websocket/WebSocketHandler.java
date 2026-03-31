@@ -17,6 +17,7 @@ import websocket.messages.NotificationMessage;
 import websocket.messages.ErrorMessage;
 
 import java.io.IOException;
+import java.time.Duration;
 
 public class WebSocketHandler {
 
@@ -34,18 +35,34 @@ public class WebSocketHandler {
     }
 
     private void onConnect(WsConnectContext ctx) {
-        // We wait for the CONNECT command to associate the session with a game
+        ctx.session.setIdleTimeout(Duration.ofMinutes(10));
+        ctx.enableAutomaticPings();
     }
 
     private void onMessage(WsMessageContext ctx) {
-        String message = ctx.message();
-        UserGameCommand command = gson.fromJson(message, UserGameCommand.class);
+        try {
+            String message = ctx.message();
+            UserGameCommand command = gson.fromJson(message, UserGameCommand.class);
 
-        switch (command.getCommandType()) {
-            case CONNECT -> connect(ctx, command);
-            case MAKE_MOVE -> makeMove(ctx, message);
-            case LEAVE -> leave(ctx, command);
-            case RESIGN -> resign(ctx, command);
+            // Guard against bad JSON
+            if (command == null || command.getCommandType() == null) {
+                sendError(ctx, "Error: Invalid command format.");
+                return;
+            }
+
+            switch (command.getCommandType()) {
+                case CONNECT -> connect(ctx, command);
+                case MAKE_MOVE -> makeMove(ctx, message);
+                case LEAVE -> leave(ctx, command);
+                case RESIGN -> resign(ctx, command);
+                default -> sendError(ctx, "Error: Unknown command type.");
+            }
+        } catch (Exception e) {
+            // This is your lifeline! It stops the connection from closing
+            // and tells you exactly what line failed.
+            System.err.println("WS Handler Error: " + e.getMessage());
+            e.printStackTrace();
+            sendError(ctx, "Server Error: " + e.getMessage());
         }
     }
 
@@ -105,10 +122,15 @@ public class WebSocketHandler {
                 throw new Exception("Error: It is not your turn.");
             }
 
-            // 5. Attempt the move (This handles Chess rules like piece movement/captures)
+            // 5. && 6.
             game.makeMove(command.getMove());
-
-            // 6. Persistence: Update the database so the board is saved
+            gameData = new GameData(
+                    gameData.gameID(),
+                    gameData.whiteUsername(),
+                    gameData.blackUsername(),
+                    gameData.gameName(),
+                    game
+            );
             gameService.getDataAccess().updateGame(gameData);
 
             // 7. Broadcast: Tell everyone the board changed

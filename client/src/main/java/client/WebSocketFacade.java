@@ -26,29 +26,43 @@ public class WebSocketFacade extends Endpoint {
 
             // 2. Establish connection
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+            container.setDefaultMaxSessionIdleTimeout(600000);
             this.session = container.connectToServer(this, socketUri);
 
             // 3. The "Detective" Message Handler
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
-                    // Pass 1: Parse as base class to find the type
-                    ServerMessage baseMessage = gson.fromJson(message, ServerMessage.class);
+                    try {
+                        // Pass 1: Parse as base class to find the type
+                        ServerMessage baseMessage = gson.fromJson(message, ServerMessage.class);
 
-                    // Pass 2: Re-parse into the actual specific class
-                    switch (baseMessage.getServerMessageType()) {
-                        case LOAD_GAME -> {
-                            LoadGameMessage loadMsg = gson.fromJson(message, LoadGameMessage.class);
-                            observer.notify(loadMsg);
+                        if (baseMessage == null || baseMessage.getServerMessageType() == null) {
+                            System.out.println("DEBUG: Received empty or malformed message from server.");
+                            return;
                         }
-                        case NOTIFICATION -> {
-                            NotificationMessage notificationMsg = gson.fromJson(message, NotificationMessage.class);
-                            observer.notify(notificationMsg);
+
+                        // Pass 2: Re-parse into the actual specific class
+                        switch (baseMessage.getServerMessageType()) {
+                            case LOAD_GAME -> {
+                                websocket.messages.LoadGameMessage loadMsg = gson.fromJson(message, websocket.messages.LoadGameMessage.class);
+                                observer.notify(loadMsg);
+                            }
+                            case NOTIFICATION -> {
+                                websocket.messages.NotificationMessage notificationMsg = gson.fromJson(message, websocket.messages.NotificationMessage.class);
+                                observer.notify(notificationMsg);
+                            }
+                            case ERROR -> {
+                                websocket.messages.ErrorMessage errorMsg = gson.fromJson(message, websocket.messages.ErrorMessage.class);
+                                observer.notify(errorMsg);
+                            }
+                            default -> System.out.println("DEBUG: Unknown message type received: " + baseMessage.getServerMessageType());
                         }
-                        case ERROR -> {
-                            ErrorMessage errorMsg = gson.fromJson(message, ErrorMessage.class);
-                            observer.notify(errorMsg);
-                        }
+                    } catch (Exception e) {
+                        // THIS IS THE MOST IMPORTANT PART
+                        System.err.println("CRITICAL: Error in WebSocket onMessage handling!");
+                        e.printStackTrace();
+                        // By catching this, we prevent the WebSocket thread from dying.
                     }
                 }
             });
@@ -57,9 +71,10 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
-    @Override
+    @OnOpen
     public void onOpen(Session session, EndpointConfig endpointConfig) {
-        // Connection established!
+        session.setMaxIdleTimeout(600000);
+        System.out.println("DEBUG: WebSocket connection established!");
     }
 
     /**
@@ -75,7 +90,8 @@ public class WebSocketFacade extends Endpoint {
 
     @Override
     public void onClose(Session session, CloseReason closeReason) {
-        // Optional: you could notify the observer here if you want to update the UI state
+        System.out.println("DEBUG: Code: " + closeReason.getCloseCode().getCode());
+        System.out.println("DEBUG: Reason: " + closeReason.getReasonPhrase());
     }
 
     @Override
