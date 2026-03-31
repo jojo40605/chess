@@ -38,18 +38,4 @@ public class ConnectionManager {
             }
         }
     }
-
-    /**
-     * Sends a message to one specific person (usually the Root Client).
-     */
-    public void sendMessage(Integer gameID, String authToken, ServerMessage message) throws IOException {
-        var gameConnections = connections.get(gameID);
-        if (gameConnections != null) {
-            for (var c : gameConnections) {
-                if (c.authToken.equals(authToken) && c.session.isOpen()) {
-                    c.send(new Gson().toJson(message));
-                }
-            }
-        }
-    }
 }
