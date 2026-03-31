@@ -11,6 +11,7 @@ import service.*;
 import websocket.WebSocketHandler;
 
 import java.lang.reflect.Type;
+import java.time.Duration;
 
 public class Server {
 
@@ -30,6 +31,8 @@ public class Server {
 
         javalin = Javalin.create(config -> {
             config.staticFiles.add("/web", Location.CLASSPATH);
+
+            config.http.asyncTimeout = 0;
 
             config.jsonMapper(new JsonMapper() {
                 @NotNull
