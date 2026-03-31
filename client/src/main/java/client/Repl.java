@@ -31,8 +31,17 @@ public class Repl {
     }
 
     private void printPrompt() {
-        // Shows different prompts based on whether you are logged in
-        String status = (client.getState() == State.SIGNEDIN) ? "[LOGGED_IN]" : "[LOGGED_OUT]";
+        String status;
+        State currentState = client.getState();
+
+        if (currentState == State.GAMEPLAY) {
+            status = "[GAMEPLAY]";
+        } else if (currentState == State.SIGNEDIN) {
+            status = "[LOGGED_IN]";
+        } else {
+            status = "[LOGGED_OUT]";
+        }
+
         System.out.print("\n" + SET_TEXT_COLOR_WHITE + status + " >>> " + SET_TEXT_COLOR_GREEN);
     }
 }
