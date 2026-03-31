@@ -15,59 +15,76 @@ public class WebSocketFacade extends Endpoint {
     private final Gson gson = new Gson();
 
     public WebSocketFacade(String url, ServerMessageObserver observer) throws Exception {
+        this.observer = observer;
         try {
-            // 1. Clean up the URL (Make it protocol-agnostic)
-            url = url.replace("http", "ws");
-            if (!url.endsWith("/ws")) {
-                url = url + "/ws";
-            }
-            URI socketUri = new URI(url);
-            this.observer = observer;
+            // 1. Clean up the URL
+            URI socketUri = cleanUrl(url);
 
             // 2. Establish connection
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             container.setDefaultMaxSessionIdleTimeout(600000);
             this.session = container.connectToServer(this, socketUri);
 
-            // 3. The "Detective" Message Handler
+            // 3. Set the message handler (Logic moved to helper method)
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
-                    try {
-                        // Pass 1: Parse as base class to find the type
-                        ServerMessage baseMessage = gson.fromJson(message, ServerMessage.class);
-
-                        if (baseMessage == null || baseMessage.getServerMessageType() == null) {
-                            System.out.println("DEBUG: Received empty or malformed message from server.");
-                            return;
-                        }
-
-                        // Pass 2: Re-parse into the actual specific class
-                        switch (baseMessage.getServerMessageType()) {
-                            case LOAD_GAME -> {
-                                websocket.messages.LoadGameMessage loadMsg = gson.fromJson(message, websocket.messages.LoadGameMessage.class);
-                                observer.notify(loadMsg);
-                            }
-                            case NOTIFICATION -> {
-                                websocket.messages.NotificationMessage notificationMsg = gson.fromJson(message, websocket.messages.NotificationMessage.class);
-                                observer.notify(notificationMsg);
-                            }
-                            case ERROR -> {
-                                websocket.messages.ErrorMessage errorMsg = gson.fromJson(message, websocket.messages.ErrorMessage.class);
-                                observer.notify(errorMsg);
-                            }
-                            default -> System.out.println("DEBUG: Unknown message type received: " + baseMessage.getServerMessageType());
-                        }
-                    } catch (Exception e) {
-                        // THIS IS THE MOST IMPORTANT PART
-                        System.err.println("CRITICAL: Error in WebSocket onMessage handling!");
-                        e.printStackTrace();
-                        // By catching this, we prevent the WebSocket thread from dying.
-                    }
+                    processMessage(message);
                 }
             });
         } catch (Exception e) {
             throw new Exception("Error: Failed to connect to WebSocket: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Helper to flatten the constructor and handle URL logic.
+     */
+    private URI cleanUrl(String url) throws Exception {
+        url = url.replace("http", "ws");
+        if (!url.endsWith("/ws")) {
+            url = url + "/ws";
+        }
+        return new URI(url);
+    }
+
+    /**
+     * This handles the processing of messages outside of the constructor's nesting.
+     */
+    private void processMessage(String message) {
+        try {
+            ServerMessage baseMessage = gson.fromJson(message, ServerMessage.class);
+
+            if (baseMessage == null || baseMessage.getServerMessageType() == null) {
+                System.out.println("DEBUG: Received empty or malformed message from server.");
+                return;
+            }
+
+            handleType(baseMessage.getServerMessageType(), message);
+        } catch (Exception e) {
+            System.err.println("CRITICAL: Error in WebSocket onMessage handling!");
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Further flattens the switch statement logic.
+     */
+    private void handleType(ServerMessage.ServerMessageType type, String message) {
+        switch (type) {
+            case LOAD_GAME -> {
+                var msg = gson.fromJson(message, websocket.messages.LoadGameMessage.class);
+                observer.notify(msg);
+            }
+            case NOTIFICATION -> {
+                var msg = gson.fromJson(message, websocket.messages.NotificationMessage.class);
+                observer.notify(msg);
+            }
+            case ERROR -> {
+                var msg = gson.fromJson(message, websocket.messages.ErrorMessage.class);
+                observer.notify(msg);
+            }
+            default -> System.out.println("DEBUG: Unknown message type: " + type);
         }
     }
 

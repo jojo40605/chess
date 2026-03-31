@@ -326,7 +326,7 @@ public class ChessClient implements ServerMessageObserver{
     }
 
     private String redrawBoard() throws Exception {
-        if (lastGame == null) throw new Exception("Error: No game state available to redraw.");
+        if (lastGame == null) {throw new Exception("Error: No game state available to redraw.");}
         BoardPrinter.printBoard(lastGame.game().getBoard(), this.playerColor);
         return "";
     }
@@ -351,8 +351,8 @@ public class ChessClient implements ServerMessageObserver{
         return "Resignation cancelled.";
     }
     private String highlight(String[] params) throws Exception {
-        if (params.length < 1) throw new Exception("Error: Expected highlight <POSITION>");
-        if (lastGame == null) throw new Exception("Error: No game loaded yet.");
+        if (params.length < 1) {throw new Exception("Error: Expected highlight <POSITION>");}
+        if (lastGame == null) {throw new Exception("Error: No game loaded yet.");}
 
         ChessPosition pos = parsePosition(params[0]);
 

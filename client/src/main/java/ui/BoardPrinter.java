@@ -98,15 +98,17 @@ public class BoardPrinter {
         String[] headers = {" a ", " b ", " c ", " d ", " e ", " f ", " g ", " h "};
 
         if (perspective == ChessGame.TeamColor.BLACK) {
-            for (int i = 7; i >= 0; i--) System.out.print(headers[i]);
+            for (int i = 7; i >= 0; i--){ System.out.print(headers[i]);}
         } else {
-            for (int i = 0; i < 8; i++) System.out.print(headers[i]);
+            for (int i = 0; i < 8; i++) {System.out.print(headers[i]);}
         }
 
         System.out.println("     " + RESET_BG_COLOR);
     }
 
-    public static void printBoardWithHighlights(ChessBoard board, ChessGame.TeamColor perspective, ChessPosition center, Collection<ChessMove> moves) {
+    public static void printBoardWithHighlights
+            (ChessBoard board, ChessGame.TeamColor perspective,
+             ChessPosition center, Collection<ChessMove> moves) {
         Set<ChessPosition> endPositions = new HashSet<>();
         for (ChessMove move : moves) {
             endPositions.add(move.getEndPosition());
